@@ -1,19 +1,27 @@
-import { cartUseCases } from "@/composition/container";
-import { Cart } from "@/domain/cart/Cart";
-import { CartItem } from "@/domain/cart/CartItem";
-import { InsufficientStockError } from "@/domain/error/InsufficientStockError";
-import { Product } from "@/domain/product/Product";
-import { useState, useEffect, useCallback } from "react";
-import { CartContext } from "./CartContext";
+import React, { useState, useCallback, useEffect } from 'react';
+import { CartContext } from './CartContext';
+import type { Product } from '@/domain/product/Product';
+import type { CartItem } from '@/domain/cart/CartItem';
+import { Cart } from '@/domain/cart/Cart';
+import { InsufficientStockError } from '@/domain/error/InsufficientStockError';
+import { cartUseCases as defaultCartUseCases, type CartUseCases } from '@/composition/container';
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface CartProviderProps {
+    children: React.ReactNode;
+    cartUseCases?: CartUseCases;
+}
+
+export const CartProvider: React.FC<CartProviderProps> = ({
+    children,
+    cartUseCases = defaultCartUseCases,
+}) => {
     const [items, setItems] = useState<CartItem[]>([]);
     const [cartOpen, setCartOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         cartUseCases.getCart().then(cart => setItems(cart.getItems()));
-    }, []);
+    }, [cartUseCases]);
 
     const addItem = useCallback(async (product: Product, color?: string) => {
         try {
@@ -24,12 +32,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (err) {
             setError(err instanceof InsufficientStockError ? err.message : "Impossible d'ajouter ce produit.");
         }
-    }, []);
+    }, [cartUseCases]);
 
     const removeItem = useCallback(async (productId: string) => {
         const cart = await cartUseCases.removeItem(productId);
         setItems(cart.getItems());
-    }, []);
+    }, [cartUseCases]);
 
     const updateQuantity = useCallback(async (productId: string, quantity: number) => {
         try {
@@ -39,13 +47,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (err) {
             setError(err instanceof InsufficientStockError ? err.message : 'Quantité invalide.');
         }
-    }, []);
+    }, [cartUseCases]);
 
     const clearCartAction = useCallback(async () => {
         const cart = await cartUseCases.clear();
         setItems(cart.getItems());
         setCartOpen(false);
-    }, []);
+    }, [cartUseCases]);
 
     const cart = new Cart(items);
     const total = cart.getTotal();
