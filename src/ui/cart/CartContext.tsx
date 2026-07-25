@@ -1,6 +1,9 @@
-import React, { createContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
 import type { Product } from '@/domain/product/Product';
 import type { CartItem } from '@/domain/cart/CartItem';
+import { Cart } from '@/domain/cart/Cart';
+import { InsufficientStockError } from '@/domain/error/InsufficientStockError';
+import { cartUseCases } from '@/composition/container';
 
 export interface CartContextValue {
   items: CartItem[];
@@ -12,6 +15,7 @@ export interface CartContextValue {
   itemCount: number;
   cartOpen: boolean;
   setCartOpen: (open: boolean) => void;
+  error: string | null;
 }
 
 export const CartContext = createContext<CartContextValue | undefined>(undefined);
@@ -19,47 +23,51 @@ export const CartContext = createContext<CartContextValue | undefined>(undefined
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const addItem = useCallback((product: Product, color?: string) => {
-    setItems(prev => {
-      const existing = prev.find(i => i.product.id === product.id);
-      if (existing) {
-        return prev.map(i =>
-          i.product.id === product.id
-            ? { ...i, quantity: i.quantity + 1, selectedColor: color || i.selectedColor }
-            : i,
-        );
-      }
-      return [...prev, { product, quantity: 1, selectedColor: color }];
-    });
-    setCartOpen(true);
+  useEffect(() => {
+    cartUseCases.getCart().then(cart => setItems(cart.getItems()));
   }, []);
 
-  const removeItem = useCallback((productId: string) => {
-    setItems(prev => prev.filter(i => i.product.id !== productId));
-  }, []);
-
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      setItems(prev => prev.filter(i => i.product.id !== productId));
-    } else {
-      setItems(prev =>
-        prev.map(i => (i.product.id === productId ? { ...i, quantity } : i)),
-      );
+  const addItem = useCallback(async (product: Product, color?: string) => {
+    try {
+      const cart = await cartUseCases.addItem(product, color);
+      setItems(cart.getItems());
+      setCartOpen(true);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof InsufficientStockError ? err.message : "Impossible d'ajouter ce produit.");
     }
   }, []);
 
-  const clearCart = useCallback(() => {
-    setItems([]);
+  const removeItem = useCallback(async (productId: string) => {
+    const cart = await cartUseCases.removeItem(productId);
+    setItems(cart.getItems());
+  }, []);
+
+  const updateQuantity = useCallback(async (productId: string, quantity: number) => {
+    try {
+      const cart = await cartUseCases.updateQuantity(productId, quantity);
+      setItems(cart.getItems());
+      setError(null);
+    } catch (err) {
+      setError(err instanceof InsufficientStockError ? err.message : 'Quantité invalide.');
+    }
+  }, []);
+
+  const clearCartAction = useCallback(async () => {
+    const cart = await cartUseCases.clear();
+    setItems(cart.getItems());
     setCartOpen(false);
   }, []);
 
-  const total = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
-  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const cart = new Cart(items);
+  const total = cart.getTotal();
+  const itemCount = cart.getItemCount();
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, total, itemCount, cartOpen, setCartOpen }}
+      value={{ items, addItem, removeItem, updateQuantity, clearCart: clearCartAction, total, itemCount, cartOpen, setCartOpen, error }}
     >
       {children}
     </CartContext.Provider>

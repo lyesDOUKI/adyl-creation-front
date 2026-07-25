@@ -14,13 +14,20 @@ import { getAvailableSlots } from '@/application/appointment/getAvailableSlots';
 import { getUnavailableDates } from '@/application/appointment/getUnavailableDates';
 import { createAppointment } from '@/application/appointment/createAppointment';
 
-import type { ProductCategory } from '@/domain/product/Product';
+import type { Product, ProductCategory } from '@/domain/product/Product';
 import type { CreateOrderData } from '@/domain/order/OrderRepository';
 import type { CreateAppointmentData } from '@/domain/appointment/AppointmentRepository';
+import { LocalStorageCartRepository } from '@/infrastructure/cart/LocalStorageCartRepository';
+import { addItemToCart } from '@/application/cart/AddItemToCart';
+import { clearCart } from '@/application/cart/ClearCart';
+import { getCart } from '@/application/cart/GetCart';
+import { removeItemFromCart } from '@/application/cart/RemoveItemFromCart';
+import { updateCartItemQuantity } from '@/application/cart/UpdateItemQuantity';
 
 const productRepository = new InMemoryProductRepository();
 const orderRepository = new InMemoryOrderRepository();
 const appointmentRepository = new InMemoryAppointmentRepository();
+const cartRepository = new LocalStorageCartRepository();
 
 export const productUseCases = {
   listAll: () => listProducts(productRepository),
@@ -40,4 +47,13 @@ export const appointmentUseCases = {
   getUnavailableDates: () => getUnavailableDates(appointmentRepository),
   create: (data: CreateAppointmentData) =>
     createAppointment(appointmentRepository, data),
+};
+
+export const cartUseCases = {
+  getCart: () => getCart(cartRepository),
+  addItem: (product: Product, color?: string) => addItemToCart(cartRepository, product, color),
+  removeItem: (productId: string) => removeItemFromCart(cartRepository, productId),
+  updateQuantity: (productId: string, quantity: number) =>
+    updateCartItemQuantity(cartRepository, productId, quantity),
+  clear: () => clearCart(cartRepository),
 };
