@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 355 30% 97%;
+    --foreground: 350 40% 12%;
+
+    --card: 355 25% 99%;
+    --card-foreground: 350 40% 12%;
+
+    --popover: 355 25% 99%;
+    --popover-foreground: 350 40% 12%;
+
+    --primary: 345 80% 46%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 350 35% 93%;
+    --secondary-foreground: 345 40% 22%;
+
+    --muted: 350 18% 92%;
+    --muted-foreground: 345 12% 46%;
+
+    --accent: 350 50% 88%;
+    --accent-foreground: 345 50% 25%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 160 50% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 350 18% 89%;
+    --input: 350 18% 89%;
+    --ring: 345 80% 46%;
+
+    --radius: 1rem;
+
+    --font-heading: 'DM Sans', sans-serif;
+    --font-body: 'Inter', sans-serif;
+
+    --gradient-hero: linear-gradient(135deg, hsl(345 80% 46%), hsl(330 60% 55%), hsl(350 70% 60%));
+    --gradient-warm: linear-gradient(135deg, hsl(345 80% 46%), hsl(0 60% 55%));
+    --gradient-soft: linear-gradient(135deg, hsl(350 35% 93%), hsl(345 25% 96%));
+    --shadow-soft: 0 8px 32px -8px hsl(345 80% 46% / 0.25);
+    --shadow-card: 0 2px 20px -4px hsl(345 50% 50% / 0.08);
+    --shadow-glow: 0 0 24px hsl(345 80% 46% / 0.2);
+    --shadow-warm: 0 4px 16px -4px hsl(345 60% 50% / 0.15);
+
+    --sidebar-background: 355 30% 97%;
+    --sidebar-foreground: 345 15% 30%;
+    --sidebar-primary: 345 80% 46%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 350 35% 93%;
+    --sidebar-accent-foreground: 345 15% 20%;
+    --sidebar-border: 350 18% 89%;
+    --sidebar-ring: 345 80% 46%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+@layer utilities {
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  .shadow-warm {
+    box-shadow: var(--shadow-warm);
+  }
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  .gradient-warm {
+    background: var(--gradient-warm);
+  }
+  .gradient-soft {
+    background: var(--gradient-soft);
+  }
+  .hover-lift {
+    @apply transition-all duration-300;
+  }
+  .hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-soft);
+  }
+  .hover-scale {
+    @apply transition-transform duration-200;
+  }
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* Stagger animation for grid items */
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.stagger-child {
+  animation: stagger-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stagger-child:nth-child(1) { animation-delay: 0ms; }
+.stagger-child:nth-child(2) { animation-delay: 80ms; }
+.stagger-child:nth-child(3) { animation-delay: 160ms; }
+.stagger-child:nth-child(4) { animation-delay: 240ms; }
+.stagger-child:nth-child(5) { animation-delay: 320ms; }
+.stagger-child:nth-child(6) { animation-delay: 400ms; }
+.stagger-child:nth-child(7) { animation-delay: 480ms; }
+.stagger-child:nth-child(8) { animation-delay: 560ms; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(3deg); }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.2); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.12); }
+}
+.animate-heartbeat {
+  animation: heartbeat 1.8s ease-in-out infinite;
+}
+
+/* Floating hearts background */
+@keyframes hearts-float-1 {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.15; }
+  90% { opacity: 0.15; }
+  100% { transform: translateY(-100vh) rotate(45deg); opacity: 0; }
+}
+@keyframes hearts-float-2 {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.1; }
+  90% { opacity: 0.1; }
+  100% { transform: translateY(-100vh) rotate(-30deg); opacity: 0; }
+}
+@keyframes hearts-float-3 {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.12; }
+  90% { opacity: 0.12; }
+  100% { transform: translateY(-100vh) rotate(60deg); opacity: 0; }
+}
+
+.floating-hearts {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.floating-hearts::before,
+.floating-hearts::after,
+.floating-hearts span::before {
+  content: '♥';
+  position: absolute;
+  bottom: -20px;
+  color: hsl(345 80% 46%);
+  font-size: 1rem;
+}
+
+.floating-hearts::before {
+  left: 10%;
+  animation: hearts-float-1 8s ease-in infinite;
+  animation-delay: 0s;
+  font-size: 0.875rem;
+}
+.floating-hearts::after {
+  left: 55%;
+  animation: hearts-float-2 10s ease-in infinite;
+  animation-delay: 2s;
+  font-size: 1.125rem;
+}
+.floating-hearts span::before {
+  left: 80%;
+  animation: hearts-float-3 12s ease-in infinite;
+  animation-delay: 4s;
+  font-size: 0.75rem;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    hsl(345 80% 46%),
+    hsl(330 60% 55%),
+    hsl(350 70% 60%),
+    hsl(345 80% 46%)
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
