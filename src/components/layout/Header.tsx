@@ -8,7 +8,6 @@ import { CartSheet } from '@/components/cart/CartSheet';
 
 const navLinks = [
   { to: '/', label: 'Boutique', icon: Heart },
-  { to: '/suivi', label: 'Commandes', icon: Eye },
   { to: '/rendez-vous', label: 'RDV', icon: CalendarDays },
   { to: '/contact', label: 'Contact', icon: MessageSquare },
 ];
