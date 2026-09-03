@@ -28,7 +28,7 @@ export const toCreateOrderData = (
     customerPhone: form.phone,
     customerEmail: form.email,
     customerAddress: form.address,
-    custormerCity: form.city,
+    customerCity: form.city,
     message: form.message || null,
     items: items.map(toOrderItem),
 });

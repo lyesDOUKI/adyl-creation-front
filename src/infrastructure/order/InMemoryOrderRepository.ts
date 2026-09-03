@@ -27,7 +27,7 @@ export class InMemoryOrderRepository implements OrderRepository {
       customerPhone: data.customerPhone,
       customerEmail: data.customerEmail,
       customerAddress: data.customerAddress,
-      customerCity: data.custormerCity,
+      customerCity: data.customerCity,
       message: data.message,
       steps: [
         { status: 'pending', label: 'Commande reçue', date: new Date(), completed: true },

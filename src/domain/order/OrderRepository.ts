@@ -7,7 +7,7 @@ export interface CreateOrderData {
   customerPhone: string;
   customerEmail: string;
   customerAddress: string;
-  custormerCity: string;
+  customerCity: string;
   message: string | null;
 }
 

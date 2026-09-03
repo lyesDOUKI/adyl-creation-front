@@ -48,6 +48,8 @@ import { removeItemFromCart } from '@/application/cart/RemoveItemFromCart';
 import { updateCartItemQuantity } from '@/application/cart/UpdateItemQuantity';
 import type { CartRepository } from '@/domain/cart/CartRepository';
 import type { Product } from '@/domain/product/Product';
+import { ApiProductRepository } from '@/infrastructure/product/ApiProductRepository';
+import { ApiOrderRepository } from '@/infrastructure/order/ApiOrderRepository';
 
 export const makeCartUseCases = (repository: CartRepository) => ({
   getCart: () => getCart(repository),
@@ -58,7 +60,7 @@ export const makeCartUseCases = (repository: CartRepository) => ({
 });
 export type CartUseCases = ReturnType<typeof makeCartUseCases>;
 
-export const productUseCases = makeProductUseCases(new InMemoryProductRepository());
-export const orderUseCases = makeOrderUseCases(new InMemoryOrderRepository());
+export const productUseCases = makeProductUseCases(new ApiProductRepository());
+export const orderUseCases = makeOrderUseCases(new ApiOrderRepository());
 export const appointmentUseCases = makeAppointmentUseCases(new InMemoryAppointmentRepository());
 export const cartUseCases = makeCartUseCases(new LocalStorageCartRepository());
