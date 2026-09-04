@@ -1,0 +1,33 @@
+name: CI - React Frontend
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Vérification des types (TypeScript)
+        run: npm run type-check
+
+      - name: Lancement des tests unitaires
+        run: npm run test
+
+      - name: Build de production (Vite)
+        run: npm run build
