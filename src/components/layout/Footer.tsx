@@ -37,7 +37,7 @@ export const Footer = () => (
       </div>
       <div className="text-center mt-10 pt-6 border-t border-primary/10">
         <p className="text-xs text-muted-foreground">
-          © 2024 Adyl création · Fait avec ♥
+          © {new Date().getFullYear()} Adyl création · Fait avec ♥
         </p>
       </div>
     </div>
