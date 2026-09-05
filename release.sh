@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage: ./release.sh <patch|minor|major>
-BUMP_TYPE="${1:?Usage: ./release.sh <patch|minor|major>}"
+# Usage: ./release.sh <patch|minor|major> [--ci]
+BUMP_TYPE="${1:?Usage: ./release.sh <patch|minor|major> [--ci]}"
+CI_MODE="${2:-}"
 
 if [[ "$BUMP_TYPE" != "patch" && "$BUMP_TYPE" != "minor" && "$BUMP_TYPE" != "major" ]]; then
     echo "Erreur : le type doit être patch, minor ou major"
@@ -26,8 +27,11 @@ NEW_VERSION=$(npm version "$BUMP_TYPE" --no-git-tag-version)
 CLEAN_VERSION="${NEW_VERSION#v}"
 
 echo "== Release à créer : $CLEAN_VERSION =="
-read -rp "Confirmer ? (y/N) " CONFIRM
-[[ "$CONFIRM" == "y" ]] || { git checkout package.json package-lock.json; echo "Annulé."; exit 1; }
+
+if [[ "$CI_MODE" != "--ci" ]]; then
+    read -rp "Confirmer ? (y/N) " CONFIRM
+    [[ "$CONFIRM" == "y" ]] || { git checkout package.json package-lock.json; echo "Annulé."; exit 1; }
+fi
 
 # On applique proprement le commit et le tag Git (avec package.json et package-lock.json)
 git add package.json package-lock.json
