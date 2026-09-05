@@ -9,15 +9,11 @@ import { InMemoryCartRepository } from './InMemoryCartRepository';
 const makeProduct = (overrides: Partial<Product> = {}): Product => ({
     id: 'prod-1',
     name: 'Doudou lapin',
+    category : 'ACCESSORIES',
     price: 25,
-    inStock: true,
-    category: 'amigurumi',
-    description: '',
     imageUrl: '',
     colors: [],
-    isCustomizable: false,
-    rating: 5,
-    reviewCount: 0,
+    numberOfOrders: 0,
     ...overrides,
 });
 
@@ -40,24 +36,6 @@ describe('CartProvider (comportement complet, via useCart)', () => {
         expect(result.current.total).toBe(25);
         expect(result.current.itemCount).toBe(1);
         expect(result.current.cartOpen).toBe(true);
-    });
-
-    it("refuse d'ajouter un produit qui n'est plus en stock", async () => {
-        const repository = new InMemoryCartRepository();
-        const testCartUseCases = makeCartUseCases(repository);
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <CartProvider cartUseCases={testCartUseCases}>{children}</CartProvider>
-        );
-
-        const { result } = renderHook(() => useCart(), { wrapper });
-        const outOfStockProduct = makeProduct({ inStock: false });
-
-        await act(async () => {
-            result.current.addItem(outOfStockProduct);
-        });
-
-        expect(result.current.error).toBeTruthy();
-        expect(result.current.items).toHaveLength(0);
     });
 
     it('incrémente la quantité si le produit est ajouté plusieurs fois et reste en stock', async () => {
