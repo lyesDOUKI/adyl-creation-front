@@ -20,19 +20,17 @@ echo "== Lancement des vérifications (tests & type-check) =="
 npm run type-check
 npm run test
 
-# 3. Incrémenter la version dans le package.json et créer le commit/tag automatiquement
-# La commande "npm version" modifie le package.json, fait un commit et crée un tag vX.Y.Z
+# 3. Incrémenter la version dans le package.json et package-lock.json
 echo "== Incrémentation de la version ($BUMP_TYPE) =="
 NEW_VERSION=$(npm version "$BUMP_TYPE" --no-git-tag-version)
-# Nettoyage du 'v' renvoyé par npm version (ex: v1.0.1 -> 1.0.1)
 CLEAN_VERSION="${NEW_VERSION#v}"
 
 echo "== Release à créer : $CLEAN_VERSION =="
 read -rp "Confirmer ? (y/N) " CONFIRM
-[[ "$CONFIRM" == "y" ]] || { git checkout package.json; echo "Annulé."; exit 1; }
+[[ "$CONFIRM" == "y" ]] || { git checkout package.json package-lock.json; echo "Annulé."; exit 1; }
 
-# On applique proprement le commit et le tag Git
-git add package.json
+# On applique proprement le commit et le tag Git (avec package.json et package-lock.json)
+git add package.json package-lock.json
 git commit -m "release: version $CLEAN_VERSION"
 git tag -a "v$CLEAN_VERSION" -m "Release $CLEAN_VERSION"
 
