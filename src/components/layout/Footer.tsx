@@ -29,7 +29,7 @@ export const Footer = () => (
         <div>
           <p className="font-heading font-semibold mb-3 text-foreground">Contact</p>
           <div className="text-sm text-muted-foreground space-y-2">
-            <p>📞 0759247369</p>
+            <p>📞 +33759247369</p>
             <p>✉️ contact@Adyl._creation.fr</p>
             <p>📷 @Adyl._creation</p>
           </div>
