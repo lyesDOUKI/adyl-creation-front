@@ -22,7 +22,7 @@ export const Footer = () => (
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
             <Link to="/" className="hover:text-primary transition-colors duration-200">♥ Boutique</Link>
             <Link to="/rendez-vous" className="hover:text-primary transition-colors duration-200">♥ Rendez-vous</Link>
-            <Link to="/suivi" className="hover:text-primary transition-colors duration-200">♥ Suivi commande</Link>
+            <Link to="/suivi" className="hover:text-primary transition-colors duration-200">♥ Suivi de vos commandes</Link>
             <Link to="/contact" className="hover:text-primary transition-colors duration-200">♥ Contact</Link>
           </div>
         </div>
