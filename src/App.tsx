@@ -12,30 +12,75 @@ import OrderDetail from "./pages/OrderDetail";
 import Contact from "./pages/Contact";
 import Appointments from "./pages/Appointments";
 import NotFound from "./pages/NotFound";
+import {RequireAuth} from "@/components/auth/RequireAuth.tsx";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <CartProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/produit/:id" element={<ProductDetail />} />
-            <Route path="/commande" element={<Checkout />} />
-            <Route path="/suivi" element={<OrderTracking />} />
-            <Route path="/suivi/:id" element={<OrderDetail />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/rendez-vous" element={<Appointments />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </CartProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <CartProvider>
+          <Toaster />
+          <Sonner />
+
+          <BrowserRouter>
+            <Routes>
+              <Route
+                  path="/"
+                  element={<Index />}
+              />
+
+              <Route
+                  path="/produit/:id"
+                  element={<ProductDetail />}
+              />
+
+              <Route
+                  path="/contact"
+                  element={<Contact />}
+              />
+
+              <Route
+                  path="/rendez-vous"
+                  element={<Appointments />}
+              />
+
+              <Route
+                  path="/commande"
+                  element={
+                    <RequireAuth>
+                      <Checkout />
+                    </RequireAuth>
+                  }
+              />
+
+              <Route
+                  path="/suivi"
+                  element={
+                    <RequireAuth>
+                      <OrderTracking />
+                    </RequireAuth>
+                  }
+              />
+
+              <Route
+                  path="/suivi/:id"
+                  element={
+                    <RequireAuth>
+                      <OrderDetail />
+                    </RequireAuth>
+                  }
+              />
+
+              <Route
+                  path="*"
+                  element={<NotFound />}
+              />
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
 );
 
 export default App;
