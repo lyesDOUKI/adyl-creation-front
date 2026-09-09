@@ -1,8 +1,6 @@
-import type {
-  Product,
-  ProductCategory,
-} from '@/domain/product/Product';
+import type { Product, ProductCategory } from '@/domain/product/Product';
 import type { ProductRepository } from '@/domain/product/ProductRepository';
+import {ApiClient, ApiError} from '@/infrastructure/ApiClient';
 
 interface PageResponse<T> {
   content: T[];
@@ -23,70 +21,48 @@ interface ApiProductResponse {
 }
 
 export class ApiProductRepository implements ProductRepository {
-  private readonly productRoute = '/api/products';
+  private readonly productRoute = '/products';
+
+  constructor(private readonly apiClient: ApiClient) {}
 
   async getAll(): Promise<Product[]> {
-    const response = await fetch(this.productRoute);
-
-    if (!response.ok) {
-      throw new Error(
-          `Failed to fetch products: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const page = await response.json() as PageResponse<ApiProductResponse>;
-
-    return page.content.map((product) => this.toProduct(product));
+    const response = await this.apiClient.get<PageResponse<ApiProductResponse>>(
+        this.productRoute
+    );
+    return response.content.map(this.mapToProduct);
   }
 
   async getById(id: string): Promise<Product | undefined> {
-    const response = await fetch(`${this.productRoute}/${id}`);
-
-    if (response.status === 404) {
-      return undefined;
-    }
-
-    if (!response.ok) {
-      throw new Error(
-          `Failed to fetch product ${id}: ${response.status} ${response.statusText}`,
+    try {
+      const product = await this.apiClient.get<ApiProductResponse>(
+          `${this.productRoute}/${id}`
       );
+      return this.mapToProduct(product);
+    } catch (error) {
+      if (error instanceof ApiError && error.isNotFound()) {
+        return undefined;
+      }
+      throw error;
     }
-
-    const product = await response.json() as ApiProductResponse;
-
-    return this.toProduct(product);
   }
 
   async getByCategory(category: ProductCategory): Promise<Product[]> {
-    const params = new URLSearchParams({
-      category,
-    });
-
-    const response = await fetch(
-        `${this.productRoute}?${params.toString()}`,
+    const params = new URLSearchParams({ category });
+    const response = await this.apiClient.get<PageResponse<ApiProductResponse>>(
+        `${this.productRoute}?${params.toString()}`
     );
-
-    if (!response.ok) {
-      throw new Error(
-          `Failed to fetch products for category ${category}: ` +
-          `${response.status} ${response.statusText}`,
-      );
-    }
-
-    const page = await response.json() as PageResponse<ApiProductResponse>;
-
-    return page.content.map((product) => this.toProduct(product));
+    return response.content.map(this.mapToProduct);
   }
 
-  private toProduct(product: ApiProductResponse): Product {
+  private mapToProduct(response: ApiProductResponse): Product {
     return {
-      id: product.productId,
-      name: product.name,
-      price: product.price,
-      category: product.productCategory,
-      colors: product.colors,
-      imageUrl: product.photosUri[0] ?? '',
-      numberOfOrders: product.numberOfOrders,
+      id: response.productId,
+      name: response.name,
+      price: response.price,
+      category: response.productCategory,
+      colors: response.colors,
+      imageUrl: response.photosUri[0] ?? '',
+      numberOfOrders: response.numberOfOrders,
     };
   }
 }
