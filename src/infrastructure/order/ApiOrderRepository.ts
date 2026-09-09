@@ -3,6 +3,10 @@ import type {
   CreateOrderData,
   OrderRepository,
 } from '@/domain/order/OrderRepository';
+import {
+  ApiClient,
+  ApiError,
+} from '@/infrastructure/ApiClient';
 
 interface CreateOrderRequest {
   customerName: string;
@@ -26,58 +30,49 @@ interface CreateOrderResponse {
 }
 
 export class ApiOrderRepository implements OrderRepository {
-  private readonly orderRoute = '/api/orders';
+  private readonly orderRoute = '/orders';
+
+  constructor(private readonly apiClient: ApiClient) {}
 
   async create(data: CreateOrderData): Promise<Order> {
-    const response = await fetch(this.orderRoute, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(this.toCreateOrderRequest(data)),
-    });
+    const response =
+        await this.apiClient.post<CreateOrderResponse>(
+            this.orderRoute,
+            this.toCreateOrderRequest(data),
+        );
 
-    if (!response.ok) {
-      throw new Error(
-          `Failed to create order: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const responseData: CreateOrderResponse = await response.json();
-
-    return this.toOrder(data, responseData);
+    return this.toOrder(data, response);
   }
 
   async getAll(): Promise<Order[]> {
-    const response = await fetch(this.orderRoute);
+    const response =
+        await this.apiClient.get<CreateOrderResponse[]>(
+            this.orderRoute,
+        );
 
-    if (!response.ok) {
-      throw new Error(
-          `Failed to fetch orders: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const responseData: CreateOrderResponse[] = await response.json();
-
-    return responseData.map((order) => this.toOrderFromResponse(order));
+    return response.map(
+        (order) => this.toOrderFromResponse(order),
+    );
   }
 
   async getById(id: string): Promise<Order | undefined> {
-    const response = await fetch(`${this.orderRoute}/${id}`);
+    try {
+      const response =
+          await this.apiClient.get<CreateOrderResponse>(
+              `${this.orderRoute}/${id}`,
+          );
 
-    if (response.status === 404) {
-      return undefined;
+      return this.toOrderFromResponse(response);
+    } catch (error) {
+      if (
+          error instanceof ApiError &&
+          error.isNotFound()
+      ) {
+        return undefined;
+      }
+
+      throw error;
     }
-
-    if (!response.ok) {
-      throw new Error(
-          `Failed to fetch order: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const responseData: CreateOrderResponse = await response.json();
-
-    return this.toOrderFromResponse(responseData);
   }
 
   private toCreateOrderRequest(
@@ -141,7 +136,9 @@ export class ApiOrderRepository implements OrderRepository {
     };
   }
 
-  private createOrderSteps(createdAt: Date): Order['steps'] {
+  private createOrderSteps(
+      createdAt: Date,
+  ): Order['steps'] {
     return [
       {
         status: 'pending',
