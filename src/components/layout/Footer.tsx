@@ -14,7 +14,7 @@ export const Footer = () => (
             <p className="font-heading text-lg font-bold text-primary">Adyl création</p>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Créations artisanales au crochet<br />Fait main avec amour ♥
+            Créations artisanales au crochet<br />Fait main avec pleins d'amour ♥
           </p>
         </div>
         <div>
