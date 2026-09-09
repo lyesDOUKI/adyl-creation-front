@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Authentification</title>
+</head>
+<body>
+<script>
+    if (window.opener) {
+        window.opener.postMessage(
+            {
+                type: 'KEYCLOAK_AUTH_SUCCESS'
+            },
+            window.location.origin
+        );
+
+        window.close();
+    }
+</script>
+</body>
+</html>
