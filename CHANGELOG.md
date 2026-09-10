@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.0.4...v2.1.0) (2026-09-10)
+
+
+### Features
+
+* chekout no need no more to send personnal informations ([9773ab2](https://github.com/lyesDOUKI/adyl-creation-front/commit/9773ab2278932af0c87a1f0d85074ae7886134f7))
+
 ## [2.0.4](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.0.3...v2.0.4) (2026-09-10)
 
 
