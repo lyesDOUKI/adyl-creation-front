@@ -1,12 +1,11 @@
 import type { Order } from '@/domain/order/Order';
-import type {
-  CreateOrderData,
-  OrderRepository,
-} from '@/domain/order/OrderRepository';
-import {
-  ApiClient,
-  ApiError,
-} from '@/infrastructure/ApiClient';
+import type { OrderItem } from '@/domain/order/OrderItem';
+import type { OrderStatus } from '@/domain/order/OrderStatus';
+import {CreateOrderData, OrderRepository} from "@/domain/order/OrderRepository.ts";
+import {ApiClient, ApiError} from "@/infrastructure/ApiClient.ts";
+import {buildOrderSteps} from "@/domain/order/BuildOrderSteps.ts";
+import {ProductCategory} from "@/domain/product/Product.ts";
+
 
 interface CreateOrderRequest {
   customerName: string;
@@ -24,9 +23,38 @@ interface CreateOrderItemRequest {
   color?: string;
 }
 
-interface CreateOrderResponse {
+interface OrderLineResponse {
+  productId: string;
+  productName: string;
+  productCategory: ProductCategory | null;
+  quantity: number;
+  unitPrice: number;
+  chosenColor: string | null;
+  subtotalBeforeDiscount: number;
+  discountRate: number;
+  discountAmount: number;
+  totalAmount: number;
+}
+
+interface GetOrderResponse {
   orderId: string;
+  customerId: string;
+  customerMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
   total: number;
+  status: string;
+  lines: OrderLineResponse[];
+  lineCount: number;
+  totalQuantity: number;
+}
+
+interface PageResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }
 
 export class ApiOrderRepository implements OrderRepository {
@@ -35,39 +63,31 @@ export class ApiOrderRepository implements OrderRepository {
   constructor(private readonly apiClient: ApiClient) {}
 
   async create(data: CreateOrderData): Promise<Order> {
-    const response =
-        await this.apiClient.post<CreateOrderResponse>(
-            this.orderRoute,
-            this.toCreateOrderRequest(data),
-        );
+    const response = await this.apiClient.post<GetOrderResponse>(
+        this.orderRoute,
+        this.toCreateOrderRequest(data),
+    );
 
-    return this.toOrder(data, response);
+    return this.toOrderFromGetResponse(response);
   }
 
   async getAll(): Promise<Order[]> {
-    const response =
-        await this.apiClient.get<CreateOrderResponse[]>(
-            this.orderRoute,
-        );
-
-    return response.map(
-        (order) => this.toOrderFromResponse(order),
+    const response = await this.apiClient.get<PageResponse<GetOrderResponse>>(
+        this.orderRoute,
     );
+
+    return response.content.map((order) => this.toOrderFromGetResponse(order));
   }
 
   async getById(id: string): Promise<Order | undefined> {
     try {
-      const response =
-          await this.apiClient.get<CreateOrderResponse>(
-              `${this.orderRoute}/${id}`,
-          );
+      const response = await this.apiClient.get<GetOrderResponse>(
+          `${this.orderRoute}/${id}`,
+      );
 
-      return this.toOrderFromResponse(response);
+      return this.toOrderFromGetResponse(response);
     } catch (error) {
-      if (
-          error instanceof ApiError &&
-          error.isNotFound()
-      ) {
+      if (error instanceof ApiError && error.isNotFound()) {
         return undefined;
       }
 
@@ -75,9 +95,7 @@ export class ApiOrderRepository implements OrderRepository {
     }
   }
 
-  private toCreateOrderRequest(
-      data: CreateOrderData,
-  ): CreateOrderRequest {
+  private toCreateOrderRequest(data: CreateOrderData): CreateOrderRequest {
     return {
       customerName: data.customerName,
       customerEmail: data.customerEmail,
@@ -88,84 +106,43 @@ export class ApiOrderRepository implements OrderRepository {
       items: data.items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
-        color: item.selectedColor,
+        color: item.chosenColor,
       })),
     };
   }
 
-  private toOrder(
-      data: CreateOrderData,
-      response: CreateOrderResponse,
-  ): Order {
-    const createdAt = new Date();
+  private toOrderFromGetResponse(response: GetOrderResponse): Order {
+    const createdAt = new Date(response.createdAt);
+    const updatedAt = new Date(response.updatedAt);
+    const status = response.status as OrderStatus;
 
     return {
       id: response.orderId,
-      items: data.items,
+      customerId: response.customerId,
+      items: (response.lines ?? []).map((line) => this.toOrderItem(line)),
+      lineCount: response.lineCount,
+      totalQuantity: response.totalQuantity,
       total: response.total,
-      status: 'pending',
+      status,
       createdAt,
-      customerName: data.customerName,
-      customerPhone: data.customerPhone,
-      customerEmail: data.customerEmail,
-      customerAddress: data.customerAddress,
-      customerCity: data.customerCity,
-      message: data.message,
-      steps: this.createOrderSteps(createdAt),
+      updatedAt,
+      message: response.customerMessage ?? undefined,
+      steps: buildOrderSteps(status, createdAt, updatedAt),
     };
   }
 
-  private toOrderFromResponse(
-      response: CreateOrderResponse,
-  ): Order {
-    const createdAt = new Date();
-
+  private toOrderItem(line: OrderLineResponse): OrderItem {
     return {
-      id: response.orderId,
-      items: [],
-      total: response.total,
-      status: 'pending',
-      createdAt,
-      customerName: '',
-      customerPhone: '',
-      customerEmail: '',
-      customerAddress: '',
-      customerCity: '',
-      message: '',
-      steps: this.createOrderSteps(createdAt),
+      productId: line.productId,
+      productName: line.productName,
+      productCategory: line.productCategory ?? undefined,
+      quantity: line.quantity,
+      unitPrice: line.unitPrice,
+      chosenColor: line.chosenColor ?? undefined,
+      subtotalBeforeDiscount: line.subtotalBeforeDiscount,
+      discountRate: line.discountRate,
+      discountAmount: line.discountAmount,
+      totalAmount: line.totalAmount,
     };
-  }
-
-  private createOrderSteps(
-      createdAt: Date,
-  ): Order['steps'] {
-    return [
-      {
-        status: 'pending',
-        label: 'Commande reçue',
-        date: createdAt,
-        completed: true,
-      },
-      {
-        status: 'confirmed',
-        label: 'Confirmée',
-        completed: false,
-      },
-      {
-        status: 'in_progress',
-        label: 'En fabrication',
-        completed: false,
-      },
-      {
-        status: 'shipped',
-        label: 'Expédiée',
-        completed: false,
-      },
-      {
-        status: 'delivered',
-        label: 'Livrée',
-        completed: false,
-      },
-    ];
   }
 }
