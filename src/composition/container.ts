@@ -51,6 +51,9 @@ import type { Product } from '@/domain/product/Product';
 import { ApiProductRepository } from '@/infrastructure/product/ApiProductRepository';
 import { ApiOrderRepository } from '@/infrastructure/order/ApiOrderRepository';
 import {apiClient} from "@/infrastructure/api.dependencies.ts";
+import {CustomerRepository, RegisterCustomerData} from "@/domain/customer/CustomerRepository.ts";
+import {register} from "@/application/register/register.ts";
+import {ApiRegisterRepository} from "@/infrastructure/register/ApiRegisterRepository.ts";
 
 export const makeCartUseCases = (repository: CartRepository) => ({
   getCart: () => getCart(repository),
@@ -61,7 +64,11 @@ export const makeCartUseCases = (repository: CartRepository) => ({
 });
 export type CartUseCases = ReturnType<typeof makeCartUseCases>;
 
+export const makeCustomerUseCases = (repository: CustomerRepository) => ({
+  register: (data: RegisterCustomerData) => register(repository, data)
+});
 export const productUseCases = makeProductUseCases(new ApiProductRepository(apiClient));
 export const orderUseCases = makeOrderUseCases(new ApiOrderRepository(apiClient));
 export const appointmentUseCases = makeAppointmentUseCases(new InMemoryAppointmentRepository());
 export const cartUseCases = makeCartUseCases(new LocalStorageCartRepository());
+export const customerUseCases = makeCustomerUseCases(new ApiRegisterRepository(apiClient));
