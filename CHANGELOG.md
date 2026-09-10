@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.4](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.0.3...v2.0.4) (2026-09-10)
+
+
+### Bug Fixes
+
+* nginx read config file for env.js ([73f7c36](https://github.com/lyesDOUKI/adyl-creation-front/commit/73f7c36572ce93e89ea03684ccfcdcd19773ef92))
+
 ## [2.0.3](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.0.2...v2.0.3) (2026-09-10)
 
 
