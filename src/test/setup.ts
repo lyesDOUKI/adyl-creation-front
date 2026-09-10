@@ -13,3 +13,9 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: () => {},
   }),
 });
+
+window.__ENV__ = {
+  KEYCLOAK_URL: "http://localhost:8080",
+  KEYCLOAK_REALM: "adyl-creation",
+  KEYCLOAK_CLIENT_ID: "adyl-creation-scalar",
+};
