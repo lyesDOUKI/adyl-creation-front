@@ -80,7 +80,7 @@ const OrderDetail = () => {
           <div className="flex items-start justify-between flex-wrap gap-4 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-2xl font-heading font-bold">{order.id}</h1>
+                <h1 className="text-2xl font-heading font-bold">{order.orderReference}</h1>
 
                 <Badge variant={statusVariants[order.status]}>
                   {statusLabels[order.status]}
@@ -183,13 +183,7 @@ const OrderDetail = () => {
                 <div>
                   <dt className="text-muted-foreground">Référence</dt>
 
-                  <dd className="font-medium break-all">{order.id}</dd>
-                </div>
-
-                <div>
-                  <dt className="text-muted-foreground">Client</dt>
-
-                  <dd className="font-medium break-all">{order.customerId}</dd>
+                  <dd className="font-medium break-all">{order.orderReference}</dd>
                 </div>
 
                 <div>
