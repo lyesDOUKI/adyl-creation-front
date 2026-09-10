@@ -8,9 +8,6 @@ import {ProductCategory} from "@/domain/product/Product.ts";
 
 
 interface CreateOrderRequest {
-  customerName: string;
-  customerEmail: string;
-  customerPhoneNumber: string;
   customerAddress: string;
   customerCity: string;
   customerMessage?: string;
@@ -38,6 +35,7 @@ interface OrderLineResponse {
 
 interface GetOrderResponse {
   orderId: string;
+  orderReference: string;
   customerId: string;
   customerMessage: string | null;
   createdAt: string;
@@ -97,9 +95,6 @@ export class ApiOrderRepository implements OrderRepository {
 
   private toCreateOrderRequest(data: CreateOrderData): CreateOrderRequest {
     return {
-      customerName: data.customerName,
-      customerEmail: data.customerEmail,
-      customerPhoneNumber: data.customerPhone,
       customerAddress: data.customerAddress,
       customerCity: data.customerCity,
       customerMessage: data.message,
@@ -118,6 +113,7 @@ export class ApiOrderRepository implements OrderRepository {
 
     return {
       id: response.orderId,
+      orderReference: response.orderReference,
       customerId: response.customerId,
       items: (response.lines ?? []).map((line) => this.toOrderItem(line)),
       lineCount: response.lineCount,

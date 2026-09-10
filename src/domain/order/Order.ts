@@ -4,6 +4,7 @@ import type { OrderStep } from './OrderStep';
 
 export interface Order {
   id: string;
+  orderReference: string;
   customerId: string;
   items: OrderItem[];
   lineCount: number;
