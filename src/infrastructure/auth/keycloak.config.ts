@@ -1,5 +1,5 @@
 export const keycloakConfig = {
-    url: 'http://localhost:8080',
-    realm: 'adyl-creation',
-    clientId: 'adyl-creation-front',
+    url: window.__ENV__.KEYCLOAK_URL,
+    realm: window.__ENV__.KEYCLOAK_REALM,
+    clientId: window.__ENV__.KEYCLOAK_CLIENT_ID,
 };
