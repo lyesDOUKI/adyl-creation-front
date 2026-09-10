@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.3](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.0.2...v2.0.3) (2026-09-10)
+
+
+### Bug Fixes
+
+* entrypoint env file not exist ([853ea4f](https://github.com/lyesDOUKI/adyl-creation-front/commit/853ea4f0c20ac03a8fa7583115eb0acb82f79331))
+
 ## [2.0.2](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.0.1...v2.0.2) (2026-09-10)
 
 
