@@ -35,9 +35,6 @@ import {
 } from '@/ui/forms/createOrderMapper';
 
 const defaultForm: OrderFormValues = {
-  name: '',
-  phone: '',
-  email: '',
   address: '',
   city: '',
   message: '',
@@ -105,6 +102,10 @@ const Checkout = () => {
   const userEmail = user?.email;
   const userPhone = user?.phone ?? '';
 
+  const fullName = [user?.firstName, user?.lastName]
+      .filter(Boolean)
+      .join(' ');
+
   useEffect(() => {
     if (!isAuthenticated || isLoading || !userEmail || !userPhone) {
       return;
@@ -136,23 +137,6 @@ const Checkout = () => {
     registerCurrentCustomer();
   }, [isAuthenticated, isLoading, userEmail, userPhone]);
 
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
-
-    const fullName = [user.firstName, user.lastName]
-        .filter(Boolean)
-        .join(' ');
-
-    setForm(currentForm => ({
-      ...currentForm,
-      name: fullName || currentForm.name,
-      email: user.email ?? currentForm.email,
-      phone: user.phone ?? currentForm.phone,
-    }));
-  }, [user]);
-
   const update =
       (field: keyof OrderFormValues) =>
           (
@@ -163,7 +147,7 @@ const Checkout = () => {
                 [field]: e.target.value,
               }));
 
-  const isStep1Valid = Boolean(form.phone.trim());
+  const isStep1Valid = Boolean(userPhone);
 
   const isStep2Valid = Boolean(form.address.trim() && form.city.trim());
 
@@ -367,19 +351,19 @@ const Checkout = () => {
                       <ReadonlyField
                           icon={User}
                           label="Nom complet"
-                          value={form.name}
+                          value={fullName}
                       />
 
                       <ReadonlyField
                           icon={Mail}
                           label="Email"
-                          value={form.email}
+                          value={user?.email ?? ''}
                       />
 
                       <ReadonlyField
                           icon={Phone}
                           label="Téléphone"
-                          value={form.phone}
+                          value={userPhone}
                       />
                     </div>
 
@@ -531,7 +515,7 @@ const Checkout = () => {
                             <dt>Nom</dt>
 
                             <dd className="text-foreground text-right">
-                              {form.name}
+                              {fullName}
                             </dd>
                           </div>
 
@@ -539,7 +523,7 @@ const Checkout = () => {
                             <dt>Email</dt>
 
                             <dd className="text-foreground text-right">
-                              {form.email}
+                              {user?.email}
                             </dd>
                           </div>
 
@@ -547,7 +531,7 @@ const Checkout = () => {
                             <dt>Téléphone</dt>
 
                             <dd className="text-foreground text-right">
-                              {form.phone}
+                              {userPhone}
                             </dd>
                           </div>
                         </dl>
@@ -634,7 +618,7 @@ const Checkout = () => {
               <div className="space-y-3 mb-4">
                 {items.map(item => (
                     <div
-                        key={item.product.id}
+                        key={`${item.product.id}-${item.selectedColor ?? 'default'}`}
                         className="flex items-center gap-3"
                     >
                       <img
@@ -649,6 +633,9 @@ const Checkout = () => {
                         </p>
 
                         <p className="text-xs text-muted-foreground">
+                          {item.selectedColor && (
+                              <>Couleur : {item.selectedColor} · </>
+                          )}
                           x{item.quantity}
                         </p>
                       </div>
