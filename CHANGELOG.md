@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.0.0...v2.0.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* inject keycloak variables for deploying ([216fd24](https://github.com/lyesDOUKI/adyl-creation-front/commit/216fd2422fba066964b1ccf9746ec1285939361f))
+
 ## [2.0.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v1.0.5...v2.0.0) (2026-09-10)
 
 
