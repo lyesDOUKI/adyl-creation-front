@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.1.0...v2.2.0) (2026-09-10)
+
+
+### Features
+
+* use order reference when review orders ([24f56b5](https://github.com/lyesDOUKI/adyl-creation-front/commit/24f56b50465af8887cc7a7b6841b0b48badf2a5d))
+
 ## [2.1.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.0.4...v2.1.0) (2026-09-10)
 
 
