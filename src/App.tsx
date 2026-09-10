@@ -18,68 +18,64 @@ const queryClient = new QueryClient();
 
 const App = () => (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <CartProvider>
-          <Toaster />
-          <Sonner />
+        <TooltipProvider>
+            <CartProvider>
+                <Toaster />
+                <Sonner />
 
-          <BrowserRouter>
-            <Routes>
-              <Route
-                  path="/"
-                  element={<Index />}
-              />
+                <BrowserRouter>
+                    <Routes>
+                        <Route
+                            path="/"
+                            element={<Index />}
+                        />
 
-              <Route
-                  path="/produit/:id"
-                  element={<ProductDetail />}
-              />
+                        <Route
+                            path="/produit/:id"
+                            element={<ProductDetail />}
+                        />
 
-              <Route
-                  path="/contact"
-                  element={<Contact />}
-              />
+                        <Route
+                            path="/contact"
+                            element={<Contact />}
+                        />
 
-              <Route
-                  path="/rendez-vous"
-                  element={<Appointments />}
-              />
+                        <Route
+                            path="/rendez-vous"
+                            element={<Appointments />}
+                        />
 
-              <Route
-                  path="/commande"
-                  element={
-                    <RequireAuth>
-                      <Checkout />
-                    </RequireAuth>
-                  }
-              />
+                        <Route
+                            path="/commande"
+                            element={<Checkout />}
+                        />
 
-              <Route
-                  path="/suivi"
-                  element={
-                    <RequireAuth>
-                      <OrderTracking />
-                    </RequireAuth>
-                  }
-              />
+                        <Route
+                            path="/suivi"
+                            element={
+                                <RequireAuth>
+                                    <OrderTracking />
+                                </RequireAuth>
+                            }
+                        />
 
-              <Route
-                  path="/suivi/:id"
-                  element={
-                    <RequireAuth>
-                      <OrderDetail />
-                    </RequireAuth>
-                  }
-              />
+                        <Route
+                            path="/suivi/:id"
+                            element={
+                                <RequireAuth>
+                                    <OrderDetail />
+                                </RequireAuth>
+                            }
+                        />
 
-              <Route
-                  path="*"
-                  element={<NotFound />}
-              />
-            </Routes>
-          </BrowserRouter>
-        </CartProvider>
-      </TooltipProvider>
+                        <Route
+                            path="*"
+                            element={<NotFound />}
+                        />
+                    </Routes>
+                </BrowserRouter>
+            </CartProvider>
+        </TooltipProvider>
     </QueryClientProvider>
 );
 

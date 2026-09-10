@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/ui/cart/useCart';
 import { useAuth } from '@/ui/hooks/useAuth';
@@ -22,6 +22,9 @@ import {
   UserPlus,
   LogIn,
   ShieldCheck,
+  Check,
+  MessageSquare,
+  ClipboardList,
 } from 'lucide-react';
 import { useCreateOrder } from '@/ui/hooks/useCreateOrder';
 import { ErrorMessage } from '@/components/ui/error-message';
@@ -29,9 +32,6 @@ import {
   OrderFormValues,
   toCreateOrderData,
 } from '@/ui/forms/createOrderMapper';
-
-const CHECKOUT_FORM_STORAGE_KEY = 'checkout-form';
-const CHECKOUT_PENDING_SUBMIT_KEY = 'checkout-pending-submit';
 
 const defaultForm: OrderFormValues = {
   name: '',
@@ -42,35 +42,57 @@ const defaultForm: OrderFormValues = {
   message: '',
 };
 
+type StepId = 1 | 2 | 3;
+
+const STEPS: { id: StepId; label: string }[] = [
+  { id: 1, label: 'Vos coordonnées' },
+  { id: 2, label: 'Votre commande' },
+  { id: 3, label: 'Récapitulatif' },
+];
+
+// Champ figé (non modifiable), alimenté depuis Keycloak
+const ReadonlyField = ({
+                         icon: Icon,
+                         label,
+                         value,
+                       }: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}) => (
+    <div className="space-y-1.5">
+      <Label className="text-primary text-sm font-medium">{label}</Label>
+      <div className="relative flex items-center gap-2.5 rounded-md border bg-muted/40 px-3 py-2.5 text-sm">
+        <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+        <span className="text-foreground truncate">{value || '—'}</span>
+      </div>
+    </div>
+);
+
 const Checkout = () => {
   const { items, total, clearCart } = useCart();
-  const { isAuthenticated, isLoading, login, register } = useAuth();
+  const { isAuthenticated, isLoading, login, register, user } = useAuth();
   const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
-
-  const [form, setForm] = useState<OrderFormValues>(() => {
-    const savedForm = sessionStorage.getItem(CHECKOUT_FORM_STORAGE_KEY);
-
-    if (!savedForm) {
-      return defaultForm;
-    }
-
-    try {
-      return {
-        ...defaultForm,
-        ...JSON.parse(savedForm),
-      };
-    } catch {
-      sessionStorage.removeItem(CHECKOUT_FORM_STORAGE_KEY);
-
-      return defaultForm;
-    }
-  });
-
-  const [authModalOpen, setAuthModalOpen] = useState(!isAuthenticated);
+  const [step, setStep] = useState<StepId>(1);
+  const [form, setForm] = useState<OrderFormValues>(defaultForm);
 
   const { isSubmitting, error, submitAction } = useCreateOrder();
-  const autoSubmitAttempted = useRef(false);
+
+  // Nom et email sont figés : dès que l'utilisateur Keycloak est connu, on les impose dans le form.
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
+
+    setForm(currentForm => ({
+      ...currentForm,
+      name: fullName || currentForm.name,
+      email: user.email ?? currentForm.email,
+    }));
+  }, [user]);
 
   const update = (field: keyof OrderFormValues) =>
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -78,18 +100,6 @@ const Checkout = () => {
             ...currentForm,
             [field]: e.target.value,
           }));
-
-  const saveFormBeforeAuthentication = () => {
-    sessionStorage.setItem(
-        CHECKOUT_FORM_STORAGE_KEY,
-        JSON.stringify(form),
-    );
-
-    sessionStorage.setItem(
-        CHECKOUT_PENDING_SUBMIT_KEY,
-        '1',
-    );
-  };
 
   const submitOrder = async () => {
     const order = await submitAction(
@@ -100,56 +110,46 @@ const Checkout = () => {
       return;
     }
 
-    sessionStorage.removeItem(CHECKOUT_FORM_STORAGE_KEY);
-    sessionStorage.removeItem(CHECKOUT_PENDING_SUBMIT_KEY);
-
-    setAuthModalOpen(false);
     setSubmitted(true);
     clearCart();
   };
 
-  useEffect(() => {
-    if (isLoading || !isAuthenticated) {
-      return;
-    }
-
-    if (autoSubmitAttempted.current) {
-      return;
-    }
-
-    const pendingSubmit = sessionStorage.getItem(
-        CHECKOUT_PENDING_SUBMIT_KEY,
-    );
-
-    if (!pendingSubmit || items.length === 0) {
-      return;
-    }
-
-    autoSubmitAttempted.current = true;
-    submitOrder();
-  }, [isAuthenticated, isLoading, items.length]);
-
   const handleLogin = async () => {
-    saveFormBeforeAuthentication();
-
     await login();
   };
 
   const handleRegister = async () => {
-    saveFormBeforeAuthentication();
-
     await register();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const isStep1Valid = Boolean(form.phone.trim());
+  const isStep2Valid = Boolean(form.address.trim() && form.city.trim());
 
-    if (!isAuthenticated) {
-      saveFormBeforeAuthentication();
-      setAuthModalOpen(true);
+  const goToStep = (target: StepId) => {
+    if (target === 2 && !isStep1Valid) {
       return;
     }
+    if (target === 3 && (!isStep1Valid || !isStep2Valid)) {
+      return;
+    }
+    setStep(target);
+  };
 
+  const handleNext = () => {
+    if (step === 3) {
+      return;
+    }
+    goToStep((step + 1) as StepId);
+  };
+
+  const handleBack = () => {
+    if (step === 1) {
+      return;
+    }
+    setStep((step - 1) as StepId);
+  };
+
+  const handleFinalSubmit = async () => {
     await submitOrder();
   };
 
@@ -201,65 +201,217 @@ const Checkout = () => {
             <ArrowLeft className="h-4 w-4" /> Retour au catalogue
           </button>
 
+          <div className="max-w-4xl mx-auto mb-8">
+            <ol className="flex items-center">
+              {STEPS.map((s, index) => {
+                const isCompleted = step > s.id;
+                const isCurrent = step === s.id;
+                const isClickable =
+                    s.id === 1 ||
+                    (s.id === 2 && isStep1Valid) ||
+                    (s.id === 3 && isStep1Valid && isStep2Valid) ||
+                    s.id < step;
+
+                return (
+                    <li key={s.id} className="flex items-center flex-1 last:flex-none">
+                      <button
+                          type="button"
+                          onClick={() => isClickable && goToStep(s.id)}
+                          disabled={!isClickable}
+                          className="flex items-center gap-2.5 group disabled:cursor-not-allowed"
+                      >
+                        <span
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
+                                isCompleted
+                                    ? 'bg-primary text-primary-foreground'
+                                    : isCurrent
+                                        ? 'bg-primary/10 text-primary ring-2 ring-primary'
+                                        : 'bg-muted text-muted-foreground'
+                            }`}
+                        >
+                          {isCompleted ? <Check className="h-4 w-4" /> : s.id}
+                        </span>
+                        <span
+                            className={`text-sm font-medium hidden sm:block transition-colors ${
+                                isCurrent ? 'text-foreground' : 'text-muted-foreground'
+                            }`}
+                        >
+                          {s.label}
+                        </span>
+                      </button>
+                      {index < STEPS.length - 1 && (
+                          <div
+                              className={`h-px flex-1 mx-3 transition-colors ${
+                                  step > s.id ? 'bg-primary' : 'bg-border'
+                              }`}
+                          />
+                      )}
+                    </li>
+                );
+              })}
+            </ol>
+          </div>
+
           <div className="grid md:grid-cols-[1fr_340px] gap-8 max-w-4xl mx-auto">
             <Card className="p-6">
-              <h2 className="text-xl font-heading font-bold mb-1">Vos coordonnées</h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                Laissez-nous vos informations, nous reviendrons vers vous pour la suite.
-              </p>
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-1.5">
-                  <Label htmlFor="name" className="text-primary text-sm font-medium">Nom complet</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="name" required value={form.name} onChange={update('name')} placeholder="Votre nom" className="pl-10" />
+              {step === 1 && (
+                  <div className="animate-fade-in">
+                    <h2 className="text-xl font-heading font-bold mb-1">Vos coordonnées</h2>
+                    <p className="text-sm text-muted-foreground mb-6">
+                      Pour qu'on sache où vous livrer et vous recontacter.
+                    </p>
+                    <div className="space-y-5">
+                      <ReadonlyField icon={User} label="Nom complet" value={form.name} />
+                      <ReadonlyField icon={Mail} label="Email" value={form.email} />
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="phone" className="text-primary text-sm font-medium">Téléphone</Label>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input id="phone" required value={form.phone} onChange={update('phone')} placeholder="0XX XX XX XX XX" className="pl-10" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end pt-6">
+                      <Button size="lg" onClick={handleNext} disabled={!isStep1Valid}>
+                        Continuer
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
+              )}
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="phone" className="text-primary text-sm font-medium">Téléphone</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="phone" required value={form.phone} onChange={update('phone')} placeholder="0XX XX XX XX XX" className="pl-10" />
+              {step === 2 && (
+                  <div className="animate-fade-in">
+                    <h2 className="text-xl font-heading font-bold mb-1">Votre commande</h2>
+                    <p className="text-sm text-muted-foreground mb-6">
+                      Où livrer, et une précision si vous en avez besoin.
+                    </p>
+
+                    <div className="space-y-5">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="address" className="text-primary text-sm font-medium">Adresse</Label>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input id="address" required type="text" value={form.address} onChange={update('address')} placeholder="12 rue des Lilas" className="pl-10" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="city" className="text-primary text-sm font-medium">Ville</Label>
+                        <div className="relative">
+                          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input id="city" required type="text" value={form.city} onChange={update('city')} placeholder="Avignon" className="pl-10" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="message" className="text-primary text-sm font-medium">Message (optionnel)</Label>
+                        <div className="relative">
+                          <MessageSquare className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Textarea
+                              id="message"
+                              rows={5}
+                              value={form.message}
+                              onChange={update('message')}
+                              placeholder="Précisions, personnalisation, questions..."
+                              className="pl-10"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between pt-6">
+                      <Button size="lg" variant="outline" onClick={handleBack}>
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Retour
+                      </Button>
+                      <Button size="lg" onClick={handleNext} disabled={!isStep2Valid}>
+                        Continuer
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
+              )}
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-primary text-sm font-medium">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="email" type="email" value={form.email} onChange={update('email')} placeholder="vous@exemple.com" className="pl-10" />
+              {step === 3 && (
+                  <div className="animate-fade-in">
+                    <h2 className="text-xl font-heading font-bold mb-1">Récapitulatif</h2>
+                    <p className="text-sm text-muted-foreground mb-6">
+                      Vérifiez vos informations avant d'envoyer votre demande.
+                    </p>
+
+                    <div className="space-y-4">
+                      <div className="rounded-lg border p-4 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold flex items-center gap-2">
+                            <User className="h-3.5 w-3.5 text-muted-foreground" />
+                            Coordonnées
+                          </span>
+                          <button
+                              type="button"
+                              onClick={() => setStep(1)}
+                              className="text-xs text-primary hover:underline"
+                          >
+                            Modifier
+                          </button>
+                        </div>
+                        <dl className="text-sm text-muted-foreground space-y-1">
+                          <div className="flex justify-between gap-4">
+                            <dt>Nom</dt>
+                            <dd className="text-foreground text-right">{form.name}</dd>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <dt>Email</dt>
+                            <dd className="text-foreground text-right">{form.email}</dd>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <dt>Téléphone</dt>
+                            <dd className="text-foreground text-right">{form.phone}</dd>
+                          </div>
+                        </dl>
+                      </div>
+
+                      <div className="rounded-lg border p-4 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold flex items-center gap-2">
+                            <ClipboardList className="h-3.5 w-3.5 text-muted-foreground" />
+                            Commande
+                          </span>
+                          <button
+                              type="button"
+                              onClick={() => setStep(2)}
+                              className="text-xs text-primary hover:underline"
+                          >
+                            Modifier
+                          </button>
+                        </div>
+                        <dl className="text-sm text-muted-foreground space-y-1">
+                          <div className="flex justify-between gap-4">
+                            <dt>Adresse</dt>
+                            <dd className="text-foreground text-right">{form.address}, {form.city}</dd>
+                          </div>
+                        </dl>
+                        <p className="text-sm text-muted-foreground pt-1">
+                          {form.message ? form.message : 'Aucun message'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {error && <div className="pt-4"><ErrorMessage message={error} /></div>}
+
+                    <div className="flex justify-between pt-6">
+                      <Button size="lg" variant="outline" onClick={handleBack} disabled={isSubmitting}>
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Retour
+                      </Button>
+                      <Button size="lg" onClick={handleFinalSubmit} disabled={isSubmitting}>
+                        {isSubmitting ? 'Envoi en cours' : 'Envoyer ma demande'}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="address" className="text-primary text-sm font-medium">Adresse</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="address" type="text" value={form.address} onChange={update('address')} placeholder="12 rue des Lilas" className="pl-10" />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="city" className="text-primary text-sm font-medium">Ville</Label>
-                  <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="city" type="text" value={form.city} onChange={update('city')} placeholder="Avignon" className="pl-10" />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="message" className="text-primary text-sm font-medium">Message (optionnel)</Label>
-                  <Textarea id="message" rows={4} value={form.message} onChange={update('message')} placeholder="Précisions, personnalisation, questions..." />
-                </div>
-
-                {error && <ErrorMessage message={error} />}
-
-                <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? "Envoi en cours" : "Envoyer ma demande"}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </form>
+              )}
             </Card>
 
             <Card className="p-5 h-fit">
@@ -291,12 +443,9 @@ const Checkout = () => {
         </main>
         <Footer />
 
-        {authModalOpen && !isAuthenticated && (
+        {!isAuthenticated && !isLoading && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-              <div
-                  className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-                  onClick={() => setAuthModalOpen(false)}
-              />
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
 
               <Card className="relative w-full max-w-md p-6 shadow-2xl animate-scale-in">
                 <div className="flex flex-col items-center text-center">
@@ -343,14 +492,6 @@ const Checkout = () => {
                     commande.
                   </p>
                 </div>
-
-                <button
-                    type="button"
-                    onClick={() => setAuthModalOpen(false)}
-                    className="mt-4 w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Continuer à remplir le formulaire
-                </button>
               </Card>
             </div>
         )}
