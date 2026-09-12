@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.0.0...v3.0.1) (2026-09-12)
+
+
+### Bug Fixes
+
+* remove contact link from the footer ([1a7d1b6](https://github.com/lyesDOUKI/adyl-creation-front/commit/1a7d1b6d0fe2695fc62e9a9e99601b3d5249c52e))
+
 ## [3.0.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.2.0...v3.0.0) (2026-09-12)
 
 
