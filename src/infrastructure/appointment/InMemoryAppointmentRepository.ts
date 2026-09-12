@@ -4,10 +4,13 @@ import type {
   CreateAppointmentData,
 } from '@/domain/appointment/AppointmentRepository';
 import type { TimeSlot } from '@/domain/appointment/TimeSlot';
-import { generateTimeSlots } from './timeSlotGenerator';
 import { unavailableDatesSeed } from './unavailableDatesSeed';
+import {generateTimeSlots} from "@/infrastructure/appointment/timeSlotGenerator.ts";
 
 export class InMemoryAppointmentRepository implements AppointmentRepository {
+  getAppointments(): Promise<Appointment[]> {
+      throw new Error("Method not implemented.");
+  }
   async getAvailableSlots(date: Date): Promise<TimeSlot[]> {
     return generateTimeSlots(date);
   }
@@ -19,12 +22,9 @@ export class InMemoryAppointmentRepository implements AppointmentRepository {
   async create(data: CreateAppointmentData): Promise<Appointment> {
     return {
       id: `RDV-${Date.now().toString().slice(-6)}-${Math.random().toString(36).slice(2, 6)}`,
-      date: data.date,
-      time: data.time,
-      customerName: data.customerName,
-      customerPhone: data.customerPhone,
+      slot: data.slot,
       notes: data.notes,
-      status: 'pending',
+      status: 'SUBMITTED',
     };
   }
 }

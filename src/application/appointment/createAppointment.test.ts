@@ -3,12 +3,18 @@ import { createAppointment } from './createAppointment';
 import { CreateAppointmentData } from '@/domain/appointment/AppointmentRepository';
 import { InMemoryAppointmentRepository } from '@/infrastructure/appointment/InMemoryAppointmentRepository';
 
+const buildSlot = () => ({
+    start: new Date('2026-08-15T14:00:00.000Z'),
+    end: new Date('2026-08-15T15:00:00.000Z'),
+});
+
 describe('createAppointment', () => {
-    it('crée un rendez-vous avec le statut "pending" et les informations fournies', async () => {
+    it('crée un rendez-vous avec le statut "SUBMITTED" et les informations fournies', async () => {
         const repository = new InMemoryAppointmentRepository();
+        const slot = buildSlot();
+
         const data: CreateAppointmentData = {
-            date: new Date('2026-08-15'),
-            time: '14:00',
+            slot,
             customerName: 'Camille Martin',
             customerPhone: '0612345678',
             notes: 'Amigurumi personnalisé, taille M',
@@ -16,19 +22,18 @@ describe('createAppointment', () => {
 
         const appointment = await createAppointment(repository, data);
 
-        expect(appointment.status).toBe('pending');
-        expect(appointment.customerName).toBe('Camille Martin');
-        expect(appointment.customerPhone).toBe('0612345678');
+        expect(appointment.status).toBe('SUBMITTED');
         expect(appointment.notes).toBe('Amigurumi personnalisé, taille M');
-        expect(appointment.date).toEqual(data.date);
-        expect(appointment.time).toBe('14:00');
+        expect(appointment.slot.start).toEqual(slot.start);
+        expect(appointment.slot.end).toEqual(slot.end);
     });
 
     it('génère un identifiant unique pour chaque rendez-vous créé', async () => {
         const repository = new InMemoryAppointmentRepository();
+        const slot = buildSlot();
+
         const data: CreateAppointmentData = {
-            date: new Date('2026-08-15'),
-            time: '14:00',
+            slot,
             customerName: 'Camille Martin',
             customerPhone: '0612345678',
             notes: '',

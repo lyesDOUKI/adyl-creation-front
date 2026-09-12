@@ -10,7 +10,7 @@ import { AuthButtons } from '@/components/auth/AuthButtons';
 const navLinks = [
   { to: '/', label: 'Boutique', icon: Heart },
   { to: '/suivi', label: 'Commandes', icon: Eye },
-  { to: '/contact', label: 'Contact', icon: MessageSquare },
+  { to: '/rendez-vous', label: 'Rendez-vous', icon: CalendarDays },
 ];
 
 export const Header = () => {
