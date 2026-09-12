@@ -15,8 +15,6 @@ describe('createAppointment', () => {
 
         const data: CreateAppointmentData = {
             slot,
-            customerName: 'Camille Martin',
-            customerPhone: '0612345678',
             notes: 'Amigurumi personnalisé, taille M',
         };
 
@@ -34,8 +32,6 @@ describe('createAppointment', () => {
 
         const data: CreateAppointmentData = {
             slot,
-            customerName: 'Camille Martin',
-            customerPhone: '0612345678',
             notes: '',
         };
 

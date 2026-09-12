@@ -21,6 +21,7 @@ interface AvailableSlotsResponse {
 interface SubmitAppointmentRequest {
     start: string;
     end: string;
+    notes: string;
 }
 
 interface SubmitAppointmentResponse {
@@ -87,19 +88,6 @@ export class ApiAppointmentRepository implements AppointmentRepository {
      * MAPPERS
      * ============================================================ */
 
-    /**
-     * Mapping depuis GET /appointments.
-     *
-     * Le back ne renvoie que les informations du rendez-vous :
-     * - identité (id)
-     * - créneau (startAt / endAt)
-     * - statut (status)
-     * - annulation éventuelle (cancelledAt / cancelledReason)
-     *
-     * Les champs customerName / customerPhone / notes / submittedAt
-     * ne sont PAS exposés par cet endpoint : ils restent `undefined`
-     * et ne doivent pas être inventés côté front.
-     */
     private toAppointmentFromResponse(
         response: AppointmentsResponse,
     ): Appointment {
@@ -123,6 +111,7 @@ export class ApiAppointmentRepository implements AppointmentRepository {
         return {
             start: data.slot.start.toISOString(),
             end: data.slot.end.toISOString(),
+            notes: data.notes
         };
     }
 
@@ -133,15 +122,7 @@ export class ApiAppointmentRepository implements AppointmentRepository {
         };
     }
 
-    /**
-     * SubmitAppointmentResponse ne renvoie pas customerName / customerPhone /
-     * notes — on les récupère depuis les données déjà soumises (data),
-     * jamais inventées ni laissées vides.
-     *
-     * response.status est casté vers AppointmentStatus sur la base du seul
-     * exemple "SUBMITTED" connu : à confirmer avec la liste réelle des
-     * statuts exposés par le back.
-     */
+
     private toAppointment(
         response: SubmitAppointmentResponse,
         data: CreateAppointmentData,
@@ -152,8 +133,6 @@ export class ApiAppointmentRepository implements AppointmentRepository {
                 start: new Date(response.start),
                 end: new Date(response.end),
             },
-            customerName: data.customerName,
-            customerPhone: data.customerPhone,
             notes: data.notes,
             status: response.status as AppointmentStatus,
             submittedAt: new Date(response.submittedAt),
