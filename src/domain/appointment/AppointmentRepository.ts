@@ -3,8 +3,6 @@ import type { TimeSlot } from './TimeSlot';
 
 export interface CreateAppointmentData {
   slot: TimeSlot;
-  customerName: string;
-  customerPhone: string;
   notes: string;
 }
 

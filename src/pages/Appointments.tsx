@@ -269,8 +269,6 @@ const Appointments = () => {
 
     const appointment = await submitAction({
       slot: selectedSlot,
-      customerName: fullName,
-      customerPhone: userPhone,
       notes,
     });
 
@@ -742,6 +740,7 @@ const Appointments = () => {
                           <Textarea
                               id="rdv-notes"
                               rows={5}
+                              maxLength={500}
                               value={notes}
                               onChange={(event) => {
                                 setNotes(event.target.value);
