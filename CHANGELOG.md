@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.1](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.1.0...v3.1.1) (2026-09-12)
+
+
+### Bug Fixes
+
+* improve responsive for Footer.tsx ([2aacf0f](https://github.com/lyesDOUKI/adyl-creation-front/commit/2aacf0fcc4bc574d2d2f4ab1733983f6a91bec08))
+
 ## [3.1.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.0.1...v3.1.0) (2026-09-12)
 
 
