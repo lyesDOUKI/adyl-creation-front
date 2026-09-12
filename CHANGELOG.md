@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.0.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.2.0...v3.0.0) (2026-09-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* give notes of appointment when submiting
+* implemente Appointment features
+
+### Features
+
+* give notes of appointment when submiting ([7922028](https://github.com/lyesDOUKI/adyl-creation-front/commit/79220288ca16096252729810feb65f319697d2ae))
+* implemente Appointment features ([6d54bfd](https://github.com/lyesDOUKI/adyl-creation-front/commit/6d54bfdc23a6b5d93114756dcd01687cf991f640))
+
 ## [2.2.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v2.1.0...v2.2.0) (2026-09-10)
 
 
