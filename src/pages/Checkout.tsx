@@ -33,6 +33,7 @@ import {
   OrderFormValues,
   toCreateOrderData,
 } from '@/ui/forms/createOrderMapper';
+import {ReadonlyField} from "@/components/ui/ReadonlyField.tsx";
 
 const defaultForm: OrderFormValues = {
   address: '',
@@ -48,25 +49,6 @@ const STEPS: { id: StepId; label: string }[] = [
   { id: 3, label: 'Récapitulatif' },
 ];
 
-const ReadonlyField = ({
-                         icon: Icon,
-                         label,
-                         value,
-                       }: {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-}) => (
-    <div className="space-y-1.5">
-      <Label className="text-primary text-sm font-medium">{label}</Label>
-
-      <div className="relative flex items-center gap-2.5 rounded-md border bg-muted/40 px-3 py-2.5 text-sm">
-        <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-
-        <span className="text-foreground truncate">{value || '—'}</span>
-      </div>
-    </div>
-);
 
 const Checkout = () => {
   const { items, total, clearCart } = useCart();

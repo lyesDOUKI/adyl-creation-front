@@ -1,85 +1,161 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
-import { Button } from '@/components/ui/button';
 import { useAvailableSlots } from '@/ui/hooks/useAvailableSlots';
 import { useUnavailableDates } from '@/ui/hooks/useUnavailableDates';
-import { format } from 'date-fns';
+import { isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Spinner } from '../ui/spinner';
 import { ErrorMessage } from '../ui/error-message';
+import { TimeSlot } from '@/domain/appointment/TimeSlot.ts';
+import { formatSlotTime } from '@/infrastructure/appointment/SlotFormat.ts';
+
+type AppointmentCalendarMode = 'date' | 'slot';
 
 interface AppointmentCalendarProps {
-  onSlotSelect: (date: Date, time: string) => void;
+  mode: AppointmentCalendarMode;
   selectedDate?: Date;
-  selectedTime?: string;
+  selectedSlot?: TimeSlot;
+  onDateSelect: (date: Date) => void;
+  onSlotSelect: (slot: TimeSlot) => void;
 }
 
-export const AppointmentCalendar = ({ onSlotSelect, selectedDate, selectedTime }: AppointmentCalendarProps) => {
+export const AppointmentCalendar = ({
+                                      mode,
+                                      selectedDate,
+                                      selectedSlot,
+                                      onDateSelect,
+                                      onSlotSelect,
+                                    }: AppointmentCalendarProps) => {
   const [date, setDate] = useState<Date | undefined>(selectedDate);
-  const { data: slots, isLoading: loadingAvailableSlots, error: errorLoadingSlots } = useAvailableSlots(date);
 
-  const { data: unavailableDates, isLoading, error } = useUnavailableDates();
+  useEffect(() => {
+    setDate(selectedDate);
+  }, [selectedDate]);
+
+  const {
+    data: slots,
+    isLoading: loadingSlots,
+    error: slotsError,
+  } = useAvailableSlots(date);
+
+  const {
+    data: unavailableDates,
+    isLoading: loadingUnavailable,
+    error: unavailableError,
+  } = useUnavailableDates();
+
   const handleDateSelect = (newDate: Date | undefined) => {
+    if (!newDate) return;
     setDate(newDate);
+    onDateSelect(newDate);
   };
 
-  const handleTimeSelect = (time: string) => {
-    if (date) {
-      onSlotSelect(date, time);
-    }
-  };
-
-  const isDateDisabled = (d: Date) => {
+  /**
+   * Toutes les règles de disponibilité viennent du back
+   * via `useUnavailableDates` (jours fermés, congés, etc.).
+   * Le front ne code en dur que la règle universelle :
+   * on ne peut pas réserver dans le passé.
+   */
+  const isDateDisabled = (value: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (d < today) return true;
-    if (d.getDay() === 5) return true;
-    return unavailableDates.some(ud => ud.toDateString() === d.toDateString());
+
+    if (value < today) return true;
+
+    return (unavailableDates ?? []).some((d) => isSameDay(d, value));
   };
 
-  if (loadingAvailableSlots) {
-    return <Spinner />;
+  const isSlotSelected = (slot: TimeSlot) => {
+    if (!selectedSlot || !selectedDate || !date) return false;
+    return (
+        isSameDay(selectedDate, date) &&
+        selectedSlot.start.getTime() === slot.start.getTime()
+    );
+  };
+
+  /* ============================================================
+   * DATE MODE
+   * ============================================================ */
+
+  if (mode === 'date') {
+    if (loadingUnavailable) {
+      return (
+          <div className="flex h-[340px] items-center justify-center">
+            <Spinner />
+          </div>
+      );
+    }
+
+    if (unavailableError) {
+      return <ErrorMessage message={unavailableError} />;
+    }
+
+    return (
+        <div className="flex justify-center">
+          <Calendar
+              mode="single"
+              selected={date}
+              onSelect={handleDateSelect}
+              disabled={isDateDisabled}
+              locale={fr}
+              className="pointer-events-auto p-0"
+          />
+        </div>
+    );
   }
 
-  if (errorLoadingSlots) {
-    return <ErrorMessage message={error} />;
+  /* ============================================================
+   * SLOT MODE
+   * ============================================================ */
+
+  if (!date) return null;
+
+  if (loadingSlots) {
+    return (
+        <div className="flex h-40 items-center justify-center">
+          <Spinner />
+        </div>
+    );
+  }
+
+  if (slotsError) {
+    return <ErrorMessage message={slotsError} />;
+  }
+
+  const availableSlots = slots ?? [];
+
+  if (availableSlots.length === 0) {
+    return (
+        <div className="rounded-lg border p-8 text-center">
+          <p className="text-sm font-medium">Aucun créneau ce jour</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Essayez une autre date dans le calendrier.
+          </p>
+        </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <Calendar
-        mode="single"
-        selected={date}
-        onSelect={handleDateSelect}
-        disabled={isDateDisabled}
-        className="rounded-lg border shadow-card pointer-events-auto"
-      />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {availableSlots.map((slot) => {
+          const selected = isSlotSelected(slot);
 
-      {date && slots.length > 0 && (
-        <div className="animate-slide-up space-y-3">
-          <h3 className="font-heading font-semibold">
-            Créneaux — {format(date, 'EEEE d MMMM', { locale: fr })}
-          </h3>
-          <div className="grid grid-cols-3 gap-2">
-            {slots.map(slot => (
-              <Button
-                key={slot.time}
-                variant={selectedTime === slot.time && selectedDate?.toDateString() === date.toDateString() ? 'default' : 'outline'}
-                disabled={!slot.available}
-                onClick={() => handleTimeSelect(slot.time)}
-                className="text-sm"
-                size="sm"
+          return (
+              <button
+                  key={slot.start.toISOString()}
+                  type="button"
+                  onClick={() => onSlotSelect(slot)}
+                  className={
+                      'flex h-14 items-center justify-center rounded-lg border text-base font-medium tabular-nums transition-colors ' +
+                      (selected
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : 'border-border bg-background hover:border-primary/60 hover:bg-primary/5')
+                  }
               >
-                {slot.time}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {date && slots.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center">Aucun créneau disponible ce jour.</p>
-      )}
-    </div>
+                {formatSlotTime(slot.start)}
+              </button>
+          );
+        })}
+      </div>
   );
 };

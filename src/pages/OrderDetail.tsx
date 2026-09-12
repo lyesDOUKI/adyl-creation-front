@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useOrder } from '@/ui/hooks/useOrder';
 import { formatPrice } from '@/domain/shared/formatPrice';
-import { downloadOrderInvoice } from '@/ui/invoice/downloadOrderInvoice';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { OrderTimeline } from '@/components/order/OrderTimeline';
@@ -96,14 +95,6 @@ const OrderDetail = () => {
                 })}
               </p>
             </div>
-
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={() => downloadOrderInvoice(order)}
-            >
-              <Download className="h-4 w-4 mr-2" /> Télécharger la facture
-            </Button>
           </div>
 
           <div className="grid md:grid-cols-[1fr_280px] gap-6">

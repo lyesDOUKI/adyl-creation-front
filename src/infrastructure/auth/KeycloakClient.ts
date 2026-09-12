@@ -1,3 +1,6 @@
+import Keycloak from "keycloak-js";
+import {keycloakConfig} from "@/infrastructure/auth/keycloak.config.ts";
+
 export class KeycloakClient {
     private readonly keycloak: Keycloak;
 
