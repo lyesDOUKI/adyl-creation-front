@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.0.1...v3.1.0) (2026-09-12)
+
+
+### Features
+
+* improve responsive design for mobile ([33f32b1](https://github.com/lyesDOUKI/adyl-creation-front/commit/33f32b19c9d60f21fa33849da241c4f1406445e1))
+
 ## [3.0.1](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.0.0...v3.0.1) (2026-09-12)
 
 
