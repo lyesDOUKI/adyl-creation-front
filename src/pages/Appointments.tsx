@@ -98,7 +98,7 @@ const AppointmentItem = ({ appointment }: { appointment: Appointment }) => {
 
         {/* Content */}
         <div className="flex min-w-0 flex-1 flex-col justify-center">
-          <div className="mb-1 flex items-center gap-2">
+          <div className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-xs font-medium capitalize text-muted-foreground">
             {weekday}
           </span>
@@ -152,24 +152,24 @@ const AppointmentsPanel = () => {
   return (
       <Card className="overflow-hidden">
         {/* Header — sticky dans la Card */}
-        <div className="flex items-center justify-between border-b bg-muted/30 px-5 py-3.5">
-          <div className="flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-primary" />
+        <div className="flex items-center justify-between gap-2 border-b bg-muted/30 px-4 sm:px-5 py-3.5">
+          <div className="flex items-center gap-2 min-w-0">
+            <CalendarClock className="h-4 w-4 text-primary shrink-0" />
 
-            <h2 className="text-sm font-heading font-bold">
+            <h2 className="text-sm font-heading font-bold truncate">
               Mes rendez-vous
             </h2>
           </div>
 
           {!isLoading && !error && upcoming.length > 0 && (
-              <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
+              <span className="inline-flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
             {upcoming.length}
           </span>
           )}
         </div>
 
         {/* Body */}
-        <div className="p-4">
+        <div className="p-3 sm:p-4">
           {isLoading ? (
               <div className="flex h-32 items-center justify-center">
                 <Spinner />
@@ -189,7 +189,7 @@ const AppointmentsPanel = () => {
                 </p>
               </div>
           ) : (
-              <div className="max-h-[calc(100vh-16rem)] space-y-5 overflow-y-auto pr-1">
+              <div className="max-h-[60vh] lg:max-h-[calc(100vh-16rem)] space-y-5 overflow-y-auto pr-1">
                 {/* Upcoming */}
                 {upcoming.length > 0 && (
                     <div>
@@ -306,17 +306,17 @@ const Appointments = () => {
 
   if (confirmedSlot) {
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col overflow-x-hidden">
           <Header />
 
-          <main className="flex-1 container py-8 animate-fade-in">
+          <main className="flex-1 container px-4 sm:px-6 py-6 sm:py-8 pb-24 md:pb-8 animate-fade-in">
             <div className="max-w-6xl mx-auto grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-              <div className="flex items-start justify-center">
-                <Card className="w-full max-w-md p-8 text-center space-y-5 animate-scale-in">
+              <div className="flex items-start justify-center order-2 lg:order-1">
+                <Card className="w-full max-w-md p-6 sm:p-8 text-center space-y-5 animate-scale-in">
                   <CheckCircle className="h-16 w-16 text-primary mx-auto" />
 
                   <div>
-                    <h2 className="text-2xl font-heading font-bold">
+                    <h2 className="text-xl sm:text-2xl font-heading font-bold">
                       Rendez-vous confirmé !
                     </h2>
 
@@ -357,7 +357,7 @@ const Appointments = () => {
                 </Card>
               </div>
 
-              <aside className="lg:sticky lg:top-8 lg:self-start">
+              <aside className="order-1 lg:order-2 lg:sticky lg:top-8 lg:self-start">
                 <AppointmentsPanel />
               </aside>
             </div>
@@ -373,16 +373,16 @@ const Appointments = () => {
    * ============================================================ */
 
   return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col overflow-x-hidden">
         <Header />
 
-        <main className="flex-1 container py-8 animate-fade-in">
+        <main className="flex-1 container px-4 sm:px-6 py-6 sm:py-8 pb-24 md:pb-8 animate-fade-in">
           <div className="max-w-6xl mx-auto">
 
             {/* HEADER */}
 
-            <div className="mb-8">
-              <h1 className="text-3xl font-heading font-bold mb-2">
+            <div className="mb-6 sm:mb-8">
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold mb-2">
                 Prendre rendez-vous
               </h1>
 
@@ -394,7 +394,7 @@ const Appointments = () => {
             {/* STEPS — barre compacte centrée, ne s'étale plus sur
               toute la largeur du conteneur. */}
 
-            <div className="mb-8 mx-auto max-w-lg">
+            <div className="mb-6 sm:mb-8 mx-auto max-w-lg">
               <ol className="flex items-center">
                 {STEPS.map((currentStep, index) => {
                   const isCurrent = step === currentStep.id;
@@ -415,7 +415,7 @@ const Appointments = () => {
                             className="flex items-center gap-2 group disabled:cursor-not-allowed"
                         >
                       <span
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
+                          className={`flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
                               isCompleted
                                   ? 'bg-primary text-primary-foreground'
                                   : isCurrent
@@ -431,7 +431,7 @@ const Appointments = () => {
                       </span>
 
                           <span
-                              className={`text-sm font-medium hidden sm:block ${
+                              className={`text-xs sm:text-sm font-medium hidden xs:block sm:block whitespace-nowrap ${
                                   isCurrent
                                       ? 'text-foreground'
                                       : 'text-muted-foreground'
@@ -443,7 +443,7 @@ const Appointments = () => {
 
                         {index < STEPS.length - 1 && (
                             <div
-                                className={`h-px flex-1 mx-2.5 ${
+                                className={`h-px flex-1 mx-2 sm:mx-2.5 ${
                                     step > currentStep.id
                                         ? 'bg-primary'
                                         : 'bg-border'
@@ -458,11 +458,11 @@ const Appointments = () => {
 
             {/* GRID — wizard à gauche, aside à droite. */}
 
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+            <div className="grid gap-5 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
 
               {/* LEFT — WIZARD */}
 
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6 order-2 lg:order-1">
 
                 {/* STEP 1 — DATE */}
 
@@ -470,9 +470,9 @@ const Appointments = () => {
                     <div className="animate-fade-in">
                       <div className="mb-6">
                         <div className="flex items-center gap-2">
-                          <CalendarDays className="h-5 w-5 text-primary" />
+                          <CalendarDays className="h-5 w-5 text-primary shrink-0" />
 
-                          <h2 className="text-xl font-heading font-bold">
+                          <h2 className="text-lg sm:text-xl font-heading font-bold">
                             Choisissez une date
                           </h2>
                         </div>
@@ -497,12 +497,12 @@ const Appointments = () => {
                             <div className="flex items-center gap-3">
                               <CalendarDays className="h-5 w-5 text-primary shrink-0" />
 
-                              <div>
+                              <div className="min-w-0">
                                 <p className="text-xs text-muted-foreground">
                                   Date sélectionnée
                                 </p>
 
-                                <p className="text-sm font-medium capitalize">
+                                <p className="text-sm font-medium capitalize break-words">
                                   {format(
                                       selectedDate,
                                       'EEEE d MMMM yyyy',
@@ -519,6 +519,7 @@ const Appointments = () => {
                             size="lg"
                             onClick={() => setStep(2)}
                             disabled={!selectedDate}
+                            className="w-full sm:w-auto"
                         >
                           Choisir un créneau
                           <ArrowRight className="h-4 w-4 ml-2" />
@@ -533,9 +534,9 @@ const Appointments = () => {
                     <div className="animate-fade-in">
                       <div className="mb-6">
                         <div className="flex items-center gap-2">
-                          <Clock className="h-5 w-5 text-primary" />
+                          <Clock className="h-5 w-5 text-primary shrink-0" />
 
-                          <h2 className="text-xl font-heading font-bold">
+                          <h2 className="text-lg sm:text-xl font-heading font-bold">
                             Choisissez votre créneau
                           </h2>
                         </div>
@@ -549,12 +550,12 @@ const Appointments = () => {
                         <div className="flex items-center gap-3">
                           <CalendarDays className="h-5 w-5 text-primary shrink-0" />
 
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-xs text-muted-foreground">
                               Date
                             </p>
 
-                            <p className="text-sm font-medium capitalize">
+                            <p className="text-sm font-medium capitalize break-words">
                               {format(
                                   selectedDate,
                                   'EEEE d MMMM yyyy',
@@ -583,12 +584,12 @@ const Appointments = () => {
                             <div className="flex items-start gap-3">
                               <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
 
-                              <div>
+                              <div className="min-w-0">
                                 <p className="text-xs text-muted-foreground">
                                   Créneau sélectionné
                                 </p>
 
-                                <p className="font-medium">
+                                <p className="font-medium break-words">
                                   {formatSlotTime(selectedSlot.start)} —{' '}
                                   {formatSlotTime(selectedSlot.end)}
                                 </p>
@@ -604,11 +605,12 @@ const Appointments = () => {
                           </div>
                       )}
 
-                      <div className="flex justify-between pt-6">
+                      <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 pt-6">
                         <Button
                             size="lg"
                             variant="outline"
                             onClick={() => setStep(1)}
+                            className="w-full sm:w-auto"
                         >
                           <ArrowLeft className="h-4 w-4 mr-2" />
                           Retour
@@ -618,6 +620,7 @@ const Appointments = () => {
                             size="lg"
                             onClick={() => setStep(3)}
                             disabled={!selectedSlot}
+                            className="w-full sm:w-auto"
                         >
                           Continuer
                           <ArrowRight className="h-4 w-4 ml-2" />
@@ -632,9 +635,9 @@ const Appointments = () => {
                     <div className="animate-fade-in">
                       <div className="mb-6">
                         <div className="flex items-center gap-2">
-                          <CheckCircle className="h-5 w-5 text-primary" />
+                          <CheckCircle className="h-5 w-5 text-primary shrink-0" />
 
-                          <h2 className="text-xl font-heading font-bold">
+                          <h2 className="text-lg sm:text-xl font-heading font-bold">
                             Récapitulatif
                           </h2>
                         </div>
@@ -646,12 +649,12 @@ const Appointments = () => {
                       </div>
 
                       <div className="space-y-4">
-                        <div className="rounded-lg border p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                        <div className="rounded-lg border p-4 overflow-hidden">
+                          <div className="flex items-center justify-between gap-2 mb-3">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <CalendarDays className="h-4 w-4 text-muted-foreground shrink-0" />
 
-                              <span className="text-sm font-semibold">
+                              <span className="text-sm font-semibold truncate">
                             Rendez-vous
                           </span>
                             </div>
@@ -659,13 +662,13 @@ const Appointments = () => {
                             <button
                                 type="button"
                                 onClick={() => setStep(2)}
-                                className="text-xs text-primary hover:underline"
+                                className="text-xs text-primary hover:underline shrink-0"
                             >
                               Modifier
                             </button>
                           </div>
 
-                          <p className="text-sm font-medium capitalize">
+                          <p className="text-sm font-medium capitalize break-words">
                             {format(
                                 selectedDate,
                                 'EEEE d MMMM yyyy',
@@ -673,15 +676,15 @@ const Appointments = () => {
                             )}
                           </p>
 
-                          <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
+                          <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-2 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5" />
+                          <Clock className="h-3.5 w-3.5 shrink-0" />
                           {formatSlotTime(selectedSlot.start)} —{' '}
                           {formatSlotTime(selectedSlot.end)}
                         </span>
 
                             <span className="flex items-center gap-1.5">
-                          <Timer className="h-3.5 w-3.5" />
+                          <Timer className="h-3.5 w-3.5 shrink-0" />
                               {formatSlotDuration(
                                   selectedSlot.start,
                                   selectedSlot.end,
@@ -690,9 +693,9 @@ const Appointments = () => {
                           </div>
                         </div>
 
-                        <div className="rounded-lg border p-4">
+                        <div className="rounded-lg border p-4 overflow-hidden">
                           <div className="flex items-center gap-2 mb-4">
-                            <User className="h-4 w-4 text-muted-foreground" />
+                            <User className="h-4 w-4 text-muted-foreground shrink-0" />
 
                             <span className="text-sm font-semibold">
                           Vos informations
@@ -723,7 +726,7 @@ const Appointments = () => {
 
                         <div className="rounded-lg border p-4">
                           <div className="flex items-center gap-2 mb-2">
-                            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                            <MessageSquare className="h-4 w-4 text-muted-foreground shrink-0" />
 
                             <Label
                                 htmlFor="rdv-notes"
@@ -752,12 +755,13 @@ const Appointments = () => {
                         {error && <ErrorMessage message={error} />}
                       </div>
 
-                      <div className="flex justify-between pt-6">
+                      <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 pt-6">
                         <Button
                             size="lg"
                             variant="outline"
                             onClick={() => setStep(2)}
                             disabled={isSubmitting}
+                            className="w-full sm:w-auto"
                         >
                           <ArrowLeft className="h-4 w-4 mr-2" />
                           Retour
@@ -771,6 +775,7 @@ const Appointments = () => {
                                 !selectedSlot ||
                                 !isCustomerReady
                             }
+                            className="w-full sm:w-auto"
                         >
                           {isSubmitting
                               ? 'Confirmation...'
@@ -783,7 +788,7 @@ const Appointments = () => {
 
               {/* RIGHT — MES RENDEZ-VOUS */}
 
-              <aside className="lg:sticky lg:top-8 lg:self-start">
+              <aside className="order-1 lg:order-2 lg:sticky lg:top-8 lg:self-start">
                 <AppointmentsPanel />
               </aside>
             </div>
@@ -798,13 +803,13 @@ const Appointments = () => {
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
               <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
 
-              <Card className="relative w-full max-w-md p-6 shadow-2xl animate-scale-in">
+              <Card className="relative w-full max-w-md p-5 sm:p-6 shadow-2xl animate-scale-in">
                 <div className="flex flex-col items-center text-center">
                   <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mb-4">
                     <LockKeyhole className="h-7 w-7 text-primary" />
                   </div>
 
-                  <h2 className="text-2xl font-heading font-bold">
+                  <h2 className="text-xl sm:text-2xl font-heading font-bold">
                     Encore une petite étape 💗
                   </h2>
 

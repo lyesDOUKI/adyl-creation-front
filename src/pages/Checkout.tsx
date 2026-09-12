@@ -49,6 +49,24 @@ const STEPS: { id: StepId; label: string }[] = [
   { id: 3, label: 'Récapitulatif' },
 ];
 
+// Small reusable row for the summary step. Long values (emails, addresses)
+// are allowed to wrap instead of overflowing their flex container, which is
+// what caused the layout to look "shifted" on narrow phones (iPhone 13 etc).
+const SummaryRow = ({
+                      label,
+                      value,
+                    }: {
+  label: string;
+  value: React.ReactNode;
+}) => (
+    <div className="flex justify-between gap-3">
+      <dt className="shrink-0 text-muted-foreground">{label}</dt>
+
+      <dd className="min-w-0 flex-1 break-words text-right text-foreground">
+        {value}
+      </dd>
+    </div>
+);
 
 const Checkout = () => {
   const { items, total, clearCart } = useCart();
@@ -199,7 +217,7 @@ const Checkout = () => {
         <div className="min-h-screen flex flex-col">
           <Header />
 
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center px-4 pb-24 md:pb-0">
             <div className="text-center space-y-4">
               <p className="text-xl text-muted-foreground">
                 Votre panier est vide
@@ -221,8 +239,8 @@ const Checkout = () => {
         <div className="min-h-screen flex flex-col">
           <Header />
 
-          <div className="flex-1 flex items-center justify-center px-4">
-            <Card className="p-8 text-center space-y-4 max-w-md animate-scale-in shadow-glow">
+          <div className="flex-1 flex items-center justify-center px-4 pb-24 md:pb-0">
+            <Card className="p-6 sm:p-8 text-center space-y-4 max-w-md animate-scale-in shadow-glow">
               <div className="text-5xl animate-heartbeat">💗</div>
 
               <h2 className="text-2xl font-heading font-bold">
@@ -248,10 +266,10 @@ const Checkout = () => {
   }
 
   return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col overflow-x-hidden">
         <Header />
 
-        <main className="flex-1 container py-6 animate-fade-in">
+        <main className="flex-1 container px-4 sm:px-6 py-6 pb-24 md:pb-6 animate-fade-in">
           <button
               onClick={() => navigate('/')}
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
@@ -260,7 +278,7 @@ const Checkout = () => {
             Retour au catalogue
           </button>
 
-          <div className="max-w-4xl mx-auto mb-8">
+          <div className="max-w-4xl mx-auto mb-6 sm:mb-8">
             <ol className="flex items-center">
               {STEPS.map((s, index) => {
                 const isCompleted = step > s.id;
@@ -281,10 +299,10 @@ const Checkout = () => {
                           type="button"
                           onClick={() => isClickable && goToStep(s.id)}
                           disabled={!isClickable}
-                          className="flex items-center gap-2.5 group disabled:cursor-not-allowed"
+                          className="flex items-center gap-2 sm:gap-2.5 group disabled:cursor-not-allowed"
                       >
                     <span
-                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
+                        className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
                             isCompleted
                                 ? 'bg-primary text-primary-foreground'
                                 : isCurrent
@@ -296,7 +314,7 @@ const Checkout = () => {
                     </span>
 
                         <span
-                            className={`text-sm font-medium hidden sm:block transition-colors ${
+                            className={`text-xs sm:text-sm font-medium hidden xs:block sm:block whitespace-nowrap transition-colors ${
                                 isCurrent ? 'text-foreground' : 'text-muted-foreground'
                             }`}
                         >
@@ -306,7 +324,7 @@ const Checkout = () => {
 
                       {index < STEPS.length - 1 && (
                           <div
-                              className={`h-px flex-1 mx-3 transition-colors ${
+                              className={`h-px flex-1 mx-2 sm:mx-3 transition-colors ${
                                   step > s.id ? 'bg-primary' : 'bg-border'
                               }`}
                           />
@@ -317,11 +335,11 @@ const Checkout = () => {
             </ol>
           </div>
 
-          <div className="grid md:grid-cols-[1fr_340px] gap-8 max-w-4xl mx-auto">
-            <Card className="p-6">
+          <div className="grid md:grid-cols-[1fr_340px] gap-5 sm:gap-6 md:gap-8 max-w-4xl mx-auto">
+            <Card className="p-4 sm:p-6 order-2 md:order-1">
               {step === 1 && (
                   <div className="animate-fade-in">
-                    <h2 className="text-xl font-heading font-bold mb-1">
+                    <h2 className="text-lg sm:text-xl font-heading font-bold mb-1">
                       Vos coordonnées
                     </h2>
 
@@ -367,6 +385,7 @@ const Checkout = () => {
                           size="lg"
                           onClick={handleNext}
                           disabled={!isStep1Valid}
+                          className="w-full sm:w-auto"
                       >
                         Continuer
                         <ArrowRight className="h-4 w-4 ml-2" />
@@ -377,7 +396,7 @@ const Checkout = () => {
 
               {step === 2 && (
                   <div className="animate-fade-in">
-                    <h2 className="text-xl font-heading font-bold mb-1">
+                    <h2 className="text-lg sm:text-xl font-heading font-bold mb-1">
                       Votre commande
                     </h2>
 
@@ -455,8 +474,13 @@ const Checkout = () => {
                       </div>
                     </div>
 
-                    <div className="flex justify-between pt-6">
-                      <Button size="lg" variant="outline" onClick={handleBack}>
+                    <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 pt-6">
+                      <Button
+                          size="lg"
+                          variant="outline"
+                          onClick={handleBack}
+                          className="w-full sm:w-auto"
+                      >
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Retour
                       </Button>
@@ -465,6 +489,7 @@ const Checkout = () => {
                           size="lg"
                           onClick={handleNext}
                           disabled={!isStep2Valid}
+                          className="w-full sm:w-auto"
                       >
                         Continuer
                         <ArrowRight className="h-4 w-4 ml-2" />
@@ -475,7 +500,7 @@ const Checkout = () => {
 
               {step === 3 && (
                   <div className="animate-fade-in">
-                    <h2 className="text-xl font-heading font-bold mb-1">
+                    <h2 className="text-lg sm:text-xl font-heading font-bold mb-1">
                       Récapitulatif
                     </h2>
 
@@ -484,68 +509,45 @@ const Checkout = () => {
                     </p>
 
                     <div className="space-y-4">
-                      <div className="rounded-lg border p-4 space-y-2.5">
+                      <div className="rounded-lg border p-4 space-y-2.5 overflow-hidden">
                         <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold flex items-center gap-2">
-                        <User className="h-3.5 w-3.5 text-muted-foreground" />
+                        <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         Coordonnées
                       </span>
                         </div>
 
-                        <dl className="text-sm text-muted-foreground space-y-1">
-                          <div className="flex justify-between gap-4">
-                            <dt>Nom</dt>
-
-                            <dd className="text-foreground text-right">
-                              {fullName}
-                            </dd>
-                          </div>
-
-                          <div className="flex justify-between gap-4">
-                            <dt>Email</dt>
-
-                            <dd className="text-foreground text-right">
-                              {user?.email}
-                            </dd>
-                          </div>
-
-                          <div className="flex justify-between gap-4">
-                            <dt>Téléphone</dt>
-
-                            <dd className="text-foreground text-right">
-                              {userPhone}
-                            </dd>
-                          </div>
+                        <dl className="text-sm space-y-1.5">
+                          <SummaryRow label="Nom" value={fullName} />
+                          <SummaryRow label="Email" value={user?.email} />
+                          <SummaryRow label="Téléphone" value={userPhone} />
                         </dl>
                       </div>
 
-                      <div className="rounded-lg border p-4 space-y-2.5">
-                        <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold flex items-center gap-2">
-                        <ClipboardList className="h-3.5 w-3.5 text-muted-foreground" />
+                      <div className="rounded-lg border p-4 space-y-2.5 overflow-hidden">
+                        <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold flex items-center gap-2 min-w-0">
+                        <ClipboardList className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         Commande
                       </span>
 
                           <button
                               type="button"
                               onClick={() => setStep(2)}
-                              className="text-xs text-primary hover:underline"
+                              className="text-xs text-primary hover:underline shrink-0"
                           >
                             Modifier
                           </button>
                         </div>
 
-                        <dl className="text-sm text-muted-foreground space-y-1">
-                          <div className="flex justify-between gap-4">
-                            <dt>Adresse</dt>
-
-                            <dd className="text-foreground text-right">
-                              {form.address}, {form.city}
-                            </dd>
-                          </div>
+                        <dl className="text-sm space-y-1.5">
+                          <SummaryRow
+                              label="Adresse"
+                              value={`${form.address}, ${form.city}`}
+                          />
                         </dl>
 
-                        <p className="text-sm text-muted-foreground pt-1">
+                        <p className="text-sm text-muted-foreground pt-1 break-words">
                           {form.message ? form.message : 'Aucun message'}
                         </p>
                       </div>
@@ -563,12 +565,13 @@ const Checkout = () => {
                         </div>
                     )}
 
-                    <div className="flex justify-between pt-6">
+                    <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 pt-6">
                       <Button
                           size="lg"
                           variant="outline"
                           onClick={handleBack}
                           disabled={isSubmitting || isRegistering}
+                          className="w-full sm:w-auto"
                       >
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Retour
@@ -580,6 +583,7 @@ const Checkout = () => {
                           disabled={
                               isSubmitting || isRegistering || !isCustomerReady
                           }
+                          className="w-full sm:w-auto"
                       >
                         {isRegistering
                             ? 'Préparation...'
@@ -592,7 +596,7 @@ const Checkout = () => {
               )}
             </Card>
 
-            <Card className="p-5 h-fit">
+            <Card className="p-4 sm:p-5 h-fit order-1 md:order-2">
               <h3 className="font-heading font-bold text-lg mb-4">
                 Votre panier
               </h3>
@@ -614,7 +618,7 @@ const Checkout = () => {
                           {item.product.name}
                         </p>
 
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground truncate">
                           {item.selectedColor && (
                               <>Couleur : {item.selectedColor} · </>
                           )}
@@ -622,7 +626,7 @@ const Checkout = () => {
                         </p>
                       </div>
 
-                      <span className="text-sm font-semibold">
+                      <span className="text-sm font-semibold shrink-0">
                     {formatPrice(item.product.price * item.quantity)}
                   </span>
                     </div>
@@ -651,13 +655,13 @@ const Checkout = () => {
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
               <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
 
-              <Card className="relative w-full max-w-md p-6 shadow-2xl animate-scale-in">
+              <Card className="relative w-full max-w-md p-5 sm:p-6 shadow-2xl animate-scale-in">
                 <div className="flex flex-col items-center text-center">
                   <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mb-4">
                     <LockKeyhole className="h-7 w-7 text-primary" />
                   </div>
 
-                  <h2 className="text-2xl font-heading font-bold">
+                  <h2 className="text-xl sm:text-2xl font-heading font-bold">
                     Encore une petite étape 💗
                   </h2>
 
