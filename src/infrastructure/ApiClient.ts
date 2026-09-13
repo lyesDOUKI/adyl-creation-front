@@ -1,9 +1,19 @@
-// api-client.ts
-import type { TokenProvider } from '@/domain/auth/TokenProvider';
+import type {TokenProvider} from '@/domain/auth/TokenProvider';
 
 interface RequestOptions extends RequestInit {
     requiresAuth?: boolean;
 }
+
+export interface ProblemDetails {
+    failureType?: string;
+    code?: string;
+    title?: string;
+    detail?: string;
+    status?: number;
+    instance?: string;
+}
+
+const DEFAULT_ERROR_MESSAGE = 'Une erreur est survenue, veuillez réessayer.';
 
 export class ApiClient {
     constructor(
@@ -43,10 +53,23 @@ export class ApiClient {
         });
 
         if (!response.ok) {
-            throw new ApiError(response.status, response.statusText);
+            const problem = await this.tryParseProblem(response);
+            throw new ApiError(response.status, response.statusText, problem);
         }
 
         return response.status === 204 ? (undefined as T) : response.json();
+    }
+
+    private async tryParseProblem(response: Response): Promise<ProblemDetails | undefined> {
+        try {
+            const contentType = response.headers.get('content-type') ?? '';
+            if (!contentType.includes('json')) {
+                return undefined;
+            }
+            return await response.json() as ProblemDetails;
+        } catch {
+            return undefined;
+        }
     }
 
     private buildHeaders(includeAuth: boolean, initialHeaders?: HeadersInit): Headers {
@@ -67,9 +90,10 @@ export class ApiClient {
 export class ApiError extends Error {
     constructor(
         public readonly status: number,
-        public readonly statusText: string
+        public readonly statusText: string,
+        public readonly problem?: ProblemDetails
     ) {
-        super(`HTTP ${status}: ${statusText}`);
+        super(problem?.title ?? problem?.detail ?? DEFAULT_ERROR_MESSAGE);
         this.name = 'ApiError';
     }
 
@@ -83,5 +107,29 @@ export class ApiError extends Error {
 
     isForbidden(): boolean {
         return this.status === 403;
+    }
+
+    isBusinessRule(): boolean {
+        return this.status === 422 && this.problem?.failureType === 'BUSINESS_RULE';
+    }
+
+    isValidationError(): boolean {
+        return this.status === 422 && this.problem?.failureType === 'VALIDATION';
+    }
+
+    get title(): string | undefined {
+        return this.problem?.title;
+    }
+
+    get detail(): string | undefined {
+        return this.problem?.detail;
+    }
+
+    get code(): string | undefined {
+        return this.problem?.code;
+    }
+
+    get userMessage(): string {
+        return this.problem?.title ?? this.problem?.detail ?? DEFAULT_ERROR_MESSAGE;
     }
 }
