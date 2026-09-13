@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.1.1...v3.2.0) (2026-09-13)
+
+
+### Features
+
+* translate business errors from http problem details ([4d3aca2](https://github.com/lyesDOUKI/adyl-creation-front/commit/4d3aca24fb9537851e1ea8deaa93985c886f2db6))
+
 ## [3.1.1](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.1.0...v3.1.1) (2026-09-12)
 
 
