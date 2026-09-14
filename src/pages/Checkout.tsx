@@ -6,7 +6,6 @@ import { formatPrice } from '@/domain/shared/formatPrice';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -17,7 +16,6 @@ import {
   Phone,
   Mail,
   Building2,
-  MapPin,
   LockKeyhole,
   UserPlus,
   LogIn,
@@ -30,15 +28,19 @@ import { useCreateOrder } from '@/ui/hooks/useCreateOrder';
 import { useRegisterCustomer } from '@/ui/hooks/useRegisterCustomer';
 import { ErrorMessage } from '@/components/ui/error-message';
 import {
-  OrderFormValues,
+  CheckoutWizardFormValues,
   toCreateOrderData,
+  toOrderFormValues,
 } from '@/ui/forms/createOrderMapper';
-import {ReadonlyField} from "@/components/ui/ReadonlyField.tsx";
+import { ReadonlyField } from '@/components/ui/ReadonlyField.tsx';
+import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete';
+import { AddressSuggestion } from '@/ui/hooks/useAddressAutocomplete';
 
-const defaultForm: OrderFormValues = {
+const defaultForm: CheckoutWizardFormValues = {
   address: '',
   city: '',
   message: '',
+  selectedAddress: null,
 };
 
 type StepId = 1 | 2 | 3;
@@ -49,9 +51,6 @@ const STEPS: { id: StepId; label: string }[] = [
   { id: 3, label: 'Récapitulatif' },
 ];
 
-// Small reusable row for the summary step. Long values (emails, addresses)
-// are allowed to wrap instead of overflowing their flex container, which is
-// what caused the layout to look "shifted" on narrow phones (iPhone 13 etc).
 const SummaryRow = ({
                       label,
                       value,
@@ -77,7 +76,7 @@ const Checkout = () => {
 
   const [submitted, setSubmitted] = useState(false);
   const [step, setStep] = useState<StepId>(1);
-  const [form, setForm] = useState<OrderFormValues>(defaultForm);
+  const [form, setForm] = useState<CheckoutWizardFormValues>(defaultForm);
 
   const {
     isSubmitting,
@@ -138,7 +137,7 @@ const Checkout = () => {
   }, [isAuthenticated, isLoading, userEmail, userPhone]);
 
   const update =
-      (field: keyof OrderFormValues) =>
+      (field: keyof CheckoutWizardFormValues) =>
           (
               e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
           ) =>
@@ -147,9 +146,33 @@ const Checkout = () => {
                 [field]: e.target.value,
               }));
 
+  const handleAddressTextChange = (text: string) => {
+    setForm(current => {
+      const stillMatchesSelection =
+          current.selectedAddress !== null &&
+          text === current.selectedAddress.label;
+
+      return {
+        ...current,
+        address: text,
+        selectedAddress: stillMatchesSelection ? current.selectedAddress : null,
+        city: stillMatchesSelection ? current.city : '',
+      };
+    });
+  };
+
+  const handleAddressSelect = (suggestion: AddressSuggestion) => {
+    setForm(current => ({
+      ...current,
+      address: suggestion.label,
+      city: suggestion.city,
+      selectedAddress: suggestion,
+    }));
+  };
+
   const isStep1Valid = Boolean(userPhone);
 
-  const isStep2Valid = Boolean(form.address.trim() && form.city.trim());
+  const isStep2Valid = Boolean(form.selectedAddress);
 
   const isCustomerReady =
       Boolean(user?.email) &&
@@ -158,11 +181,12 @@ const Checkout = () => {
       !isRegistering;
 
   const submitOrder = async () => {
-    if (!isCustomerReady) {
+    if (!isCustomerReady || !form.selectedAddress) {
       return;
     }
 
-    const order = await submitAction(toCreateOrderData(form, items));
+    const orderFormValues = toOrderFormValues(form);
+    const order = await submitAction(toCreateOrderData(orderFormValues, items));
 
     if (!order) {
       return;
@@ -264,6 +288,8 @@ const Checkout = () => {
         </div>
     );
   }
+
+  const mappedOrderValues = toOrderFormValues(form);
 
   return (
       <div className="min-h-screen flex flex-col overflow-x-hidden">
@@ -413,42 +439,26 @@ const Checkout = () => {
                           Adresse
                         </Label>
 
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <AddressAutocomplete
+                            id="address"
+                            value={form.address}
+                            onChangeText={handleAddressTextChange}
+                            onSelect={handleAddressSelect}
+                            placeholder="12 rue des Lilas"
+                            hasSelection={Boolean(form.selectedAddress)}
+                        />
 
-                          <Input
-                              id="address"
-                              required
-                              type="text"
-                              value={form.address}
-                              onChange={update('address')}
-                              placeholder="12 rue des Lilas"
-                              className="pl-10"
-                          />
-                        </div>
+                        <p className="text-xs text-muted-foreground pt-1">
+                          Choisissez une adresse dans la liste proposée.
+                        </p>
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label
-                            htmlFor="city"
-                            className="text-primary text-sm font-medium"
-                        >
-                          Ville
-                        </Label>
-
-                        <div className="relative">
-                          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-
-                          <Input
-                              id="city"
-                              required
-                              type="text"
-                              value={form.city}
-                              onChange={update('city')}
-                              placeholder="Avignon"
-                              className="pl-10"
-                          />
-                        </div>
+                        <ReadonlyField
+                            label={'Ville'}
+                            icon={Building2}
+                            value={form.city || 'Sélectionnez une adresse ci-dessus'}
+                        />
                       </div>
 
                       <div className="space-y-1.5">
@@ -543,12 +553,12 @@ const Checkout = () => {
                         <dl className="text-sm space-y-1.5">
                           <SummaryRow
                               label="Adresse"
-                              value={`${form.address}, ${form.city}`}
+                              value={`${mappedOrderValues.address}, ${mappedOrderValues.city}`}
                           />
                         </dl>
 
                         <p className="text-sm text-muted-foreground pt-1 break-words">
-                          {form.message ? form.message : 'Aucun message'}
+                          {mappedOrderValues.message ? mappedOrderValues.message : 'Aucun message'}
                         </p>
                       </div>
                     </div>
@@ -581,7 +591,10 @@ const Checkout = () => {
                           size="lg"
                           onClick={handleFinalSubmit}
                           disabled={
-                              isSubmitting || isRegistering || !isCustomerReady
+                              isSubmitting ||
+                              isRegistering ||
+                              !isCustomerReady ||
+                              !form.selectedAddress
                           }
                           className="w-full sm:w-auto"
                       >
