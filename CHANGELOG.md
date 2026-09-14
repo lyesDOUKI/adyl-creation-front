@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.2.0...v3.3.0) (2026-09-14)
+
+
+### Features
+
+* set 5 seconds timeout when displaying error message ([d0c9ca8](https://github.com/lyesDOUKI/adyl-creation-front/commit/d0c9ca886263a516ca049319531b8a5a2f67431d))
+
 ## [3.2.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.1.1...v3.2.0) (2026-09-13)
 
 
