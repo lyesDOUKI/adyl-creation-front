@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.1](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.4.0...v3.4.1) (2026-09-14)
+
+
+### Bug Fixes
+
+* add api url in entrypoint.sh ([131a06b](https://github.com/lyesDOUKI/adyl-creation-front/commit/131a06b3d1eafc882f89f0691f71a2fd1069f4a1))
+
 ## [3.4.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.3.0...v3.4.0) (2026-09-14)
 
 
