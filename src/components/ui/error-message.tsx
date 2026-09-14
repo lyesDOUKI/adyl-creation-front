@@ -1,14 +1,36 @@
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const DEFAULT_AUTO_HIDE_MS = 5000;
 
 interface ErrorMessageProps {
     message: string;
     onRetry?: () => void;
     className?: string;
+    autoHideAfter?: number;
 }
 
-export const ErrorMessage = ({ message, onRetry, className }: ErrorMessageProps) => {
+export const ErrorMessage = ({
+                                 message,
+                                 onRetry,
+                                 className,
+                                 autoHideAfter = DEFAULT_AUTO_HIDE_MS,
+                             }: ErrorMessageProps) => {
+    const [visible, setVisible] = useState(true);
+
+    useEffect(() => {
+        setVisible(true);
+
+        if (!Number.isFinite(autoHideAfter) || autoHideAfter <= 0) return;
+
+        const id = setTimeout(() => setVisible(false), autoHideAfter);
+        return () => clearTimeout(id);
+    }, [message, autoHideAfter]);
+
+    if (!visible) return null;
+
     return (
         <div className={cn('flex flex-col items-center justify-center gap-3 py-16 text-center px-4', className)}>
             <span className="text-4xl">💔</span>
