@@ -19,8 +19,8 @@ interface AvailableSlotsResponse {
 }
 
 interface SubmitAppointmentRequest {
-    start: string;
-    end: string;
+    startAt: string;
+    endAt: string;
     notes: string;
 }
 
@@ -109,8 +109,8 @@ export class ApiAppointmentRepository implements AppointmentRepository {
         data: CreateAppointmentData,
     ): SubmitAppointmentRequest {
         return {
-            start: data.slot.start.toISOString(),
-            end: data.slot.end.toISOString(),
+            startAt: data.slot.start.toISOString(),
+            endAt: data.slot.end.toISOString(),
             notes: data.notes
         };
     }
