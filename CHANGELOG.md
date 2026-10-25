@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.1](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.5.0...v3.5.1) (2026-10-25)
+
+
+### Bug Fixes
+
+* use the new api naming ([05f62b3](https://github.com/lyesDOUKI/adyl-creation-front/commit/05f62b32fe4fff6d277b86c4255024d5f679b4d3))
+
 ## [3.5.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.4.2...v3.5.0) (2026-10-25)
 
 
