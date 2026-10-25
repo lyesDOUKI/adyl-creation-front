@@ -5,8 +5,8 @@ import {Appointment, AppointmentStatus} from "@/domain/appointment/Appointment.t
 
 
 interface TimeSlotResponse {
-    start: string;
-    end: string;
+    startAt: string;
+    endAt: string;
 }
 
 interface AvailableSlotsByDateResponse {
@@ -26,8 +26,8 @@ interface SubmitAppointmentRequest {
 
 interface SubmitAppointmentResponse {
     appointmentId: string;
-    start: string;
-    end: string;
+    startAt: string;
+    endAt: string;
     status: string;
     submittedAt: string;
 }
@@ -117,8 +117,8 @@ export class ApiAppointmentRepository implements AppointmentRepository {
 
     private toTimeSlot(response: TimeSlotResponse): TimeSlot {
         return {
-            start: new Date(response.start),
-            end: new Date(response.end),
+            start: new Date(response.startAt),
+            end: new Date(response.endAt),
         };
     }
 
@@ -130,8 +130,8 @@ export class ApiAppointmentRepository implements AppointmentRepository {
         return {
             id: response.appointmentId,
             slot: {
-                start: new Date(response.start),
-                end: new Date(response.end),
+                start: new Date(response.startAt),
+                end: new Date(response.endAt),
             },
             notes: data.notes,
             status: response.status as AppointmentStatus,
