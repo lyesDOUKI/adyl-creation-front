@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.4.2...v3.5.0) (2026-10-25)
+
+
+### Features
+
+* rename request params for submit appointment ([ef60265](https://github.com/lyesDOUKI/adyl-creation-front/commit/ef602654b3b1eebee9146c7ce7f9d526ce5639ff))
+
 ## [3.4.2](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.4.1...v3.4.2) (2026-09-14)
 
 
