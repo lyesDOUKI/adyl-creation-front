@@ -5,7 +5,6 @@ interface RequestOptions extends RequestInit {
 }
 
 export interface ProblemDetails {
-    failureType?: string;
     code?: string;
     title?: string;
     detail?: string;
@@ -45,9 +44,21 @@ export class ApiClient {
         return this.request<T>(path, { ...options, method: 'DELETE' });
     }
 
+    private buildUrl(path: string): string {
+
+        if (/^https?:\/\//i.test(path)) {
+            return path;
+        }
+
+        if (path.startsWith(`${this.baseUrl}/`) || path === this.baseUrl) {
+            return path;
+        }
+        return `${this.baseUrl}${path}`;
+    }
+
     private async request<T>(path: string, options: RequestOptions): Promise<T> {
         const headers = this.buildHeaders(options.requiresAuth !== false, options.headers);
-        const response = await fetch(`${this.baseUrl}${path}`, {
+        const response = await fetch(this.buildUrl(path), {
             ...options,
             headers,
         });
@@ -110,11 +121,11 @@ export class ApiError extends Error {
     }
 
     isBusinessRule(): boolean {
-        return this.status === 422 && this.problem?.failureType === 'BUSINESS_RULE';
+        return this.status === 422 || this.status === 409;
     }
 
     isValidationError(): boolean {
-        return this.status === 422 && this.problem?.failureType === 'VALIDATION';
+        return this.status === 400
     }
 
     get title(): string | undefined {

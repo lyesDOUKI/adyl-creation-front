@@ -26,6 +26,8 @@ import {register} from "@/application/register/register.ts";
 import {ApiRegisterRepository} from "@/infrastructure/register/ApiRegisterRepository.ts";
 import {ApiAppointmentRepository} from "@/infrastructure/appointment/ApiAppointmentRepository.ts";
 import {getAppointments} from "@/application/appointment/getAppointments.ts";
+import {Order} from "@/domain/order/Order.ts";
+import {cancelOrder} from "@/application/order/CancelOrder.ts";
 
 export const makeProductUseCases = (repository: ProductRepository) => ({
   listAll: () => listProducts(repository),
@@ -38,6 +40,7 @@ export const makeOrderUseCases = (repository: OrderRepository) => ({
   listAll: () => listOrders(repository),
   getById: (id: string) => getOrderById(repository, id),
   create: (data: CreateOrderData) => createOrder(repository, data),
+  cancel: (data: Order) => cancelOrder(repository, data)
 });
 export type OrderUseCases = ReturnType<typeof makeOrderUseCases>;
 

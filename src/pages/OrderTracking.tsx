@@ -15,6 +15,7 @@ const statusLabels: Record<OrderStatus, string> = {
   ACCEPTED: 'Acceptée',
   DELIVERED: 'Livrée',
   REJECTED: 'Refusée',
+  CANCELLED: 'Annulée'
 };
 
 const statusVariants: Record<
@@ -25,6 +26,7 @@ const statusVariants: Record<
   ACCEPTED: 'default',
   DELIVERED: 'secondary',
   REJECTED: 'outline',
+  CANCELLED: 'outline'
 };
 
 // Couleur + icône par statut : un badge "outline" ne suffisait pas à
@@ -34,6 +36,7 @@ const statusIcons: Record<OrderStatus, typeof Clock> = {
   ACCEPTED: CheckCircle2,
   DELIVERED: Truck,
   REJECTED: XCircle,
+  CANCELLED: XCircle
 };
 
 const statusColors: Record<OrderStatus, string> = {
@@ -41,6 +44,7 @@ const statusColors: Record<OrderStatus, string> = {
   ACCEPTED: 'text-primary-foreground',
   DELIVERED: 'text-primary',
   REJECTED: 'text-destructive border-destructive/30',
+  CANCELLED: 'text-destructive border-destructive/30'
 };
 
 /* ============================================================

@@ -1,7 +1,9 @@
 import type { OrderItem } from './OrderItem';
 import type { OrderStatus } from './OrderStatus';
 import type { OrderStep } from './OrderStep';
+import {HalLink} from "@/infrastructure/HalLinks.ts";
 
+export type OrderRel = 'cancel';
 export interface Order {
   id: string;
   orderReference: string;
@@ -15,4 +17,5 @@ export interface Order {
   updatedAt: Date;
   message?: string;
   steps: OrderStep[];
+  _links?: Partial<Record<OrderRel, HalLink>>;
 }
