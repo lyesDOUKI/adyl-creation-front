@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.0](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.5.1...v3.6.0) (2026-11-11)
+
+
+### Features
+
+* **order:** add cancel order workflow ([d02fc52](https://github.com/lyesDOUKI/adyl-creation-front/commit/d02fc52899e8878af041cd2b2d235ed7e3a7a426))
+
 ## [3.5.1](https://github.com/lyesDOUKI/adyl-creation-front/compare/v3.5.0...v3.5.1) (2026-10-25)
 
 
