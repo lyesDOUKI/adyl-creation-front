@@ -3,3 +3,4 @@ export type OrderStatus =
   | 'ACCEPTED'
   | 'DELIVERED'
   | 'REJECTED'
+  | 'CANCELLED'

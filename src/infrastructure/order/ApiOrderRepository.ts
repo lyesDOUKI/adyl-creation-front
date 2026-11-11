@@ -5,6 +5,7 @@ import {CreateOrderData, OrderRepository} from "@/domain/order/OrderRepository.t
 import {ApiClient, ApiError} from "@/infrastructure/ApiClient.ts";
 import {buildOrderSteps} from "@/domain/order/BuildOrderSteps.ts";
 import {ProductCategory} from "@/domain/product/Product.ts";
+import {getLink, HalResource} from "@/infrastructure/HalLinks.ts";
 
 
 interface CreateOrderRequest {
@@ -47,6 +48,10 @@ interface GetOrderResponse {
   totalQuantity: number;
 }
 
+
+type OrderRel = 'cancel';
+type GetOrder = HalResource<GetOrderResponse, OrderRel>;
+
 interface PageResponse<T> {
   content: T[];
   page: number;
@@ -67,6 +72,11 @@ export class ApiOrderRepository implements OrderRepository {
     );
 
     return this.toOrderFromGetResponse(response);
+  }
+
+  async cancel(order: Order): Promise<void> {
+    const { href } = getLink(order, 'cancel');
+    return this.apiClient.post<void>(href);
   }
 
   async getAll(): Promise<Order[]> {
@@ -106,7 +116,7 @@ export class ApiOrderRepository implements OrderRepository {
     };
   }
 
-  private toOrderFromGetResponse(response: GetOrderResponse): Order {
+  private toOrderFromGetResponse(response: GetOrder): Order {
     const createdAt = new Date(response.createdAt);
     const updatedAt = new Date(response.updatedAt);
     const status = response.status as OrderStatus;
@@ -124,6 +134,7 @@ export class ApiOrderRepository implements OrderRepository {
       updatedAt,
       message: response.customerMessage ?? undefined,
       steps: buildOrderSteps(status, createdAt, updatedAt),
+      _links: response._links,
     };
   }
 

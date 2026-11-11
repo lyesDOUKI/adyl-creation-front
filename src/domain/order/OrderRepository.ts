@@ -16,4 +16,5 @@ export interface OrderRepository {
   getAll(): Promise<Order[]>;
   getById(id: string): Promise<Order | undefined>;
   create(data: CreateOrderData): Promise<Order>;
+  cancel(order: Order): Promise<void>;
 }
